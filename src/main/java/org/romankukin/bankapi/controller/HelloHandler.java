@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 public class HelloHandler implements HttpHandler {
 
   private String handleGetRequest(HttpExchange exchange) {
-    return "some info";
+    return "<h1>hello!</h1>";
   }
 
   private void handleResponse(HttpExchange exchange, String response) throws IOException {
