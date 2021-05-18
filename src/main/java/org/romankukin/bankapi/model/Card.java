@@ -1,18 +1,25 @@
-package org.romankukin.bankapi;
+package org.romankukin.bankapi.model;
 
 import java.math.BigDecimal;
+//import org.romankukin.bankapi.BankAccount;
 
 public class Card {
 
-  public static String BIN = "400000";
-  private String pin;
-  private String number;
+//  private final int cardId;//todo
+//  private int bankAccount;
+  private final String number;
+  private final String pin;
+  private final Currency currency;
   private BigDecimal balance;
+  private CardStatus status;
 
-  public Card(String number, String pin) {
-    this.pin = pin;
+  public Card(Currency currency, String number, String pin, BigDecimal balance,
+      CardStatus status) {
+    this.currency = currency;
     this.number = number;
-    this.balance = new BigDecimal(0);
+    this.pin = pin;
+    this.balance = balance;
+    this.status = status;
   }
 
   public BigDecimal getBalance() {

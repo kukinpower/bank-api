@@ -3,26 +3,34 @@ package org.romankukin.bankapi;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.sql.Connection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Logger;
 import org.romankukin.bankapi.controller.CardHandler;
 import org.romankukin.bankapi.controller.HelloHandler;
+import org.romankukin.bankapi.dao.CardDao;
+import org.romankukin.bankapi.dbconnection.DatabaseConnection;
+import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
+import org.romankukin.bankapi.model.Card;
+import org.romankukin.bankapi.service.CardService;
 
-//1) Выпуск новой карты по счету
-//2) Проcмотр списка карт
-//3) Внесение вредств
-//4) Проверка баланса
 public class ClientAPI {
 
   private static final int PORT = 8080;
   private static final int BACKLOG = 1;
   private static final Logger logger = Logger.getLogger(ClientAPI.class.getName());
   private HttpServer server;
+  private Connection connection;
 
   private void mapHandlers() {
-    server.createContext("/hello", new HelloHandler());
-    server.createContext("/card/", new CardHandler());
+    server.createContext("/api/hello", new HelloHandler());
+    server.createContext("/api/card/", new CardHandler(new CardService(new CardDao(connection))));
+  }
+
+  public void openDatabaseConnection() {
+    DatabaseConnection databaseConnection = new FileDatabaseConnection();
+    connection = databaseConnection.establishConnection();
   }
 
   public void runServer() throws IOException {
@@ -36,6 +44,7 @@ public class ClientAPI {
 
   public static void main(String[] args) throws IOException {
     ClientAPI clientAPI = new ClientAPI();
+    clientAPI.openDatabaseConnection();
     clientAPI.runServer();
   }
 }
