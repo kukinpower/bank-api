@@ -19,7 +19,7 @@
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <version>1.4.200</version>
-      <scope>runtime</scope>
+<!--      <scope>runtime</scope>-->
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->

@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.dao.BankDao;
 import org.romankukin.bankapi.dao.CardDao;
@@ -69,7 +70,12 @@ public class CardService {
   }
 
   public String getCard(HttpExchange exchange) {
-    return "card: some card";
+    Optional<Card> entity = dao.getEntity("1234567890123456");
+    if (entity.isPresent()) {
+      return entity.get().toString();
+    } else {
+      return "kek";
+    }
   }
 
   public String activateCard(HttpExchange exchange) {

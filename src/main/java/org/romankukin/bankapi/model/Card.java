@@ -5,15 +5,20 @@ import java.math.BigDecimal;
 
 public class Card {
 
-//  private final int cardId;//todo
-//  private int bankAccount;
+  //  private final int cardId;//todo
   private final String number;
   private final String pin;
+  private Integer bankAccount;
   private final Currency currency;
   private BigDecimal balance;
   private CardStatus status;
 
-  public Card(Currency currency, String number, String pin, BigDecimal balance,
+  public Card(
+      String number,
+      String pin,
+      Integer bankAccount,
+      Currency currency,
+      BigDecimal balance,
       CardStatus status) {
     this.currency = currency;
     this.number = number;

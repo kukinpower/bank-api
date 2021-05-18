@@ -59,5 +59,6 @@ public class CardHandler implements HttpHandler {
 //      response = handleGetRequest(exchange);
 //    }
     handleResponse(exchange, response);
+    exchange.close();
   }
 }

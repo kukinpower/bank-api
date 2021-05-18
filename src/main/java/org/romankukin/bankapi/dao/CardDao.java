@@ -14,6 +14,8 @@ import org.romankukin.bankapi.ClientAPI;
 import org.romankukin.bankapi.dbconnection.DatabaseConnection;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
 import org.romankukin.bankapi.model.Card;
+import org.romankukin.bankapi.model.CardStatus;
+import org.romankukin.bankapi.model.Currency;
 import org.romankukin.bankapi.service.AbstractDao;
 import org.romankukin.bankapi.service.CardService;
 
@@ -141,22 +143,22 @@ public class CardDao extends AbstractDao implements BankDao<Card, String> {
 
   @Override
   public Optional<Card> getEntity(String numberId) {
-//    try (Statement statement = connection.createStatement()) {
-//      ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId));
-//      resultSet.next();
-//      String number = resultSet.getString(1);
-//      String pin = resultSet.getString(2);
-//      Integer accountId = resultSet.getInt(3);
-//      String currency = resultSet.getString(4);
-//
-//      Card card = new Card();
-//
-//      return resultSet.getInt(1);
-//    } catch (SQLException throwables) {
-//      throwables.printStackTrace();
-//      return Optional.empty();
-//    }
-    return Optional.empty();
+    try (Statement statement = connection.createStatement()) {
+      ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId));
+      resultSet.next();
+      String number = resultSet.getString("number");
+      String pin = resultSet.getString("pin");
+      Integer accountId = resultSet.getInt("account");
+      Currency currency = Currency.valueOf(resultSet.getString("currency"));
+      BigDecimal balance = BigDecimal.valueOf(resultSet.getDouble("balance"));
+      CardStatus status = CardStatus.values()[resultSet.getInt("status") - 1];
+
+      return Optional.of(new Card(number, pin, accountId, currency, balance, status));
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return Optional.empty();
+    }
   }
 
   @Override
