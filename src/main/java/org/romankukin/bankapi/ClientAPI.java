@@ -27,7 +27,7 @@ public class ClientAPI {
 
   private void mapHandlers() {
     server.createContext("/api/hello", new HelloHandler());
-    server.createContext("/api/card/",
+    server.createContext("/api/card",
         new CardHandler((CardService) appContext.getBean("cardService")));
   }
 
