@@ -57,6 +57,6 @@ public class ClientAPI {
     ClientAPI clientAPI = new ClientAPI();
     clientAPI.openDatabaseConnection();
     clientAPI.runServer();
-    clientAPI.stop();
+//    clientAPI.stop();
   }
 }

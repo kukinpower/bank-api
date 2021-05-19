@@ -8,7 +8,7 @@ public class Card {
   //  private final int cardId;//todo
   private final String number;
   private final String pin;
-  private Integer bankAccount;
+  private Integer accountId;
   private final Currency currency;
   private BigDecimal balance;
   private CardStatus status;
@@ -16,15 +16,28 @@ public class Card {
   public Card(
       String number,
       String pin,
-      Integer bankAccount,
+      Integer accountId,
       Currency currency,
       BigDecimal balance,
       CardStatus status) {
     this.currency = currency;
     this.number = number;
+    this.accountId = accountId;
     this.pin = pin;
     this.balance = balance;
     this.status = status;
+  }
+
+  public Integer getAccountId() {
+    return accountId;
+  }
+
+  public Currency getCurrency() {
+    return currency;
+  }
+
+  public CardStatus getStatus() {
+    return status;
   }
 
   public BigDecimal getBalance() {

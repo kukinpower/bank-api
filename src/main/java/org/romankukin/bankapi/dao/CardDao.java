@@ -29,7 +29,7 @@ public class CardDao extends AbstractDao implements BankDao<Card, String> {
       + " pin varchar(4) NOT NULL,"
       + " balance INTEGER DEFAULT 0,"
       + "unique (number))";
-  private final static String INSERT_CARD = "insert into card(number, pin) values(?, ?)";
+  private final static String INSERT_CARD = "insert into card values(?, ?, ?, ?, ?, ?)";
   private final static String FIND_CARD = "select * from card"
       + " where number = '%s'";
   private final static String FIND_CARD_BY_NUMBER = "select * from card"
@@ -172,8 +172,17 @@ public class CardDao extends AbstractDao implements BankDao<Card, String> {
   }
 
   @Override
-  public boolean create(Card card) {
-    return false;
+  public boolean create(Card card) throws SQLException {
+    PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD);
+    preparedStatement.setString(1, card.getNumber());
+    preparedStatement.setString(2, card.getPin());
+    preparedStatement.setInt(3, card.getAccountId());
+    preparedStatement.setString(4, card.getCurrency().toString());
+    preparedStatement.setDouble(5, card.getBalance().doubleValue());
+    preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
+    preparedStatement.executeUpdate();
+    preparedStatement.close();
+    return true;
   }
 
   @Override

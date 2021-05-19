@@ -1,14 +1,24 @@
 package org.romankukin.bankapi.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.sun.net.httpserver.HttpExchange;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.dao.BankDao;
 import org.romankukin.bankapi.dao.CardDao;
+import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
+import org.romankukin.bankapi.exception.ObjectNotCreatedException;
+import org.romankukin.bankapi.exception.SqlExceptionToMessageConverter;
 import org.romankukin.bankapi.model.Card;
+import org.romankukin.bankapi.model.CardStatus;
+import org.romankukin.bankapi.model.Currency;
 
 public class CardService {
 
@@ -61,8 +71,41 @@ public class CardService {
     return generateRandomIntSequenceStringOfLength(4);
   }
 
-  public String addNewCard(HttpExchange exchange) {
-    return "new card added";
+  private String cardFieldsToString(Map<String, Object> fields) {
+    StringBuilder stringBuilder = new StringBuilder();
+    fields.forEach((key, value) -> stringBuilder.append(key).append(":").append(value).append(System.lineSeparator()));
+    return stringBuilder.toString();
+  }
+
+//  public String createNewCard(HttpExchange exchange, String cardNumber) {
+//    createNewCard(exchange, new Card(cardNumber, generateCardPin(), 1, Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING));
+//  }
+
+  public String createNewCard(HttpExchange exchange, Integer account)
+      throws JsonProcessingException {
+    return createNewCard(exchange, new Card(generateCardNumber(), generateCardPin(), account, Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING));
+  }
+
+  public String createNewCard(HttpExchange exchange, Card card)
+      throws JsonProcessingException {
+
+    try {
+      if (dao.create(card)) {
+        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
+        return objectWriter.writeValueAsString(card);
+      }
+    } catch (SQLException e) {
+      Optional<Card> entity = dao.getEntity(card.getNumber());
+      if (entity.isPresent()) {
+        throw new ObjectAlreadyExistsInDatabaseException(card.toString(),
+            new SqlExceptionToMessageConverter().extractStackTraceFromSqlException(e),
+            e);
+      }
+      throw new ObjectNotCreatedException(card.toString(),
+          new SqlExceptionToMessageConverter().extractStackTraceFromSqlException(e),
+          e);
+    }
+    throw new ObjectNotCreatedException(card.toString());
   }
 
   public String listAllCards(HttpExchange exchange) {
