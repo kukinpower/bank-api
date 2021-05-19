@@ -26,7 +26,6 @@ public class HelloHandler implements HttpHandler {
   @Override
   public void handle(HttpExchange exchange) throws IOException {
     String response = "";
-//    System.out.println(exchange.getRequestURI().getRawQuery());
     InputStreamReader isr =  new InputStreamReader(exchange.getRequestBody(),"utf-8");
     BufferedReader br = new BufferedReader(isr);
     String value = null;

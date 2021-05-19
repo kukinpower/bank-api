@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -24,12 +25,22 @@ import org.romankukin.bankapi.model.Currency;
 public class CardService {
 
   private final BankDao<Card, String> dao;
+  private final ObjectMapper mapper;
   public static final String BIN = "400000";
   public static int CARD_LENGTH = 16;
   public static int ACCOUNT_LENGTH = 20;
 
   public CardService(BankDao<Card, String> dao) {
     this.dao = dao;
+    this.mapper = createCardObjectMapper();
+  }
+
+  private static ObjectMapper createCardObjectMapper() {
+    ObjectMapper mapper = new ObjectMapper();
+    SimpleModule module = new SimpleModule();
+    module.addSerializer(Card.class, new CardSerializer());
+    mapper.registerModule(module);
+    return mapper;
   }
 
   public static String generateRandomIntSequenceStringOfLength(int length) {
@@ -75,13 +86,16 @@ public class CardService {
 
   private String cardFieldsToString(Map<String, Object> fields) {
     StringBuilder stringBuilder = new StringBuilder();
-    fields.forEach((key, value) -> stringBuilder.append(key).append(":").append(value).append(System.lineSeparator()));
+    fields.forEach((key, value) -> stringBuilder.append(key).append(":").append(value)
+        .append(System.lineSeparator()));
     return stringBuilder.toString();
   }
 
   public String createNewCard(HttpExchange exchange, String accountNumber)
       throws JsonProcessingException, SQLException {
-    return createNewCard(exchange, new Card(generateCardNumber(), generateCardPin(), accountNumber, Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING));
+    return createNewCard(exchange,
+        new Card(generateCardNumber(), generateCardPin(), accountNumber, Currency.RUB,
+            BigDecimal.ZERO, CardStatus.PENDING));
   }
 
   public String createNewCard(HttpExchange exchange, Card card)
@@ -110,8 +124,9 @@ public class CardService {
     return "card1, card2";
   }
 
-  public String getCard(HttpExchange exchange) throws SQLException, JsonProcessingException {
-    Optional<Card> entity = dao.getEntity("4000002698974233");
+  public String getCard(HttpExchange exchange, String cardNumber)
+      throws SQLException, JsonProcessingException {
+    Optional<Card> entity = dao.getEntity(cardNumber);
     if (entity.isPresent()) {
       ObjectMapper mapper = new ObjectMapper();
 
@@ -125,22 +140,61 @@ public class CardService {
     }
   }
 
-  public String activateCard(HttpExchange exchange) {
-    return "card: activated";
+  private String updateCardStatus(HttpExchange exchange, String cardNumber, CardStatus cardStatus)
+      throws SQLException, JsonProcessingException {
+    Optional<Card> entity = dao.getEntity(cardNumber);
+    if (entity.isPresent()) {
+      Card card = entity.get();
+      card.setStatus(cardStatus);
+      card = dao.update(card);
+
+      return cardToJson(card);
+
+    } else {
+      throw new NoSuchEntityException("no card with number: " + cardNumber);
+    }
   }
 
-  public String closeCard(HttpExchange exchange) {
-    return "card: closed";
+  public String activateCard(HttpExchange exchange, String cardNumber)
+      throws SQLException, JsonProcessingException {
+    return updateCardStatus(exchange, cardNumber, CardStatus.ACTIVE);
+  }
+
+  public String getCardBalance(HttpExchange exchange, String cardNumber) throws SQLException {
+    Optional<Card> entity = dao.getEntity(cardNumber);
+    if (entity.isPresent()) {
+      return entity.get().getBalance().toPlainString();
+    } else {
+      throw new NoSuchEntityException("no card with number: " + cardNumber);
+    }
+  }
+
+  public String closeCard(HttpExchange exchange, String cardNumber)
+      throws SQLException, JsonProcessingException {
+    return updateCardStatus(exchange, cardNumber, CardStatus.CLOSED);
   }
 
   public String getAllCards() throws SQLException, JsonProcessingException {
-    List<Card> cards = dao.getAllEntities();
-    ObjectMapper mapper = new ObjectMapper();
+    return cardToJson(dao.getAllEntities());
+  }
 
-    SimpleModule module = new SimpleModule();
-    module.addSerializer(Card.class, new CardSerializer());
-    mapper.registerModule(module);
+  private String cardToJson(Card card) throws JsonProcessingException {
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(card);
+  }
 
-    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cards);
+  private String cardToJson(List<Card> card) throws JsonProcessingException {
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(card);
+  }
+
+  public String deposit(HttpExchange exchange, String cardNumber, String amount)
+      throws SQLException, JsonProcessingException {
+    Optional<Card> entity = dao.getEntity(cardNumber);
+    if (entity.isPresent()) {
+      Card card = entity.get();
+      card.setBalance(card.getBalance().add(BigDecimal.valueOf(Double.parseDouble(amount))));
+      return cardToJson(dao.update(card));
+    } else {
+      throw new NoSuchEntityException("no card with number: " + cardNumber);
+    }
   }
 }

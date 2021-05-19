@@ -1,12 +1,17 @@
 package org.romankukin.bankapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import org.romankukin.bankapi.exception.NoRequestBodyDetectedException;
 import org.romankukin.bankapi.service.CardService;
 
 //1) Выпуск новой карты по счету
@@ -31,24 +36,62 @@ public class CardHandler implements HttpHandler {
     outputStream.close();
   }
 
-  private String handleRequest(HttpExchange exchange, String path)
+  private String extractAllAfterLastSlash(String path) {
+    return path.substring(path.lastIndexOf("/") + 1);
+  }
+
+  protected static String extractBody(HttpExchange exchange) throws IOException {
+    InputStreamReader isr =  new InputStreamReader(exchange.getRequestBody(),"utf-8");
+    BufferedReader br = new BufferedReader(isr);
+
+    String response = null;
+    if ((response = br.readLine()) != null) {
+      return response;
+    }
+    throw new NoRequestBodyDetectedException();
+  }
+  
+  private String handlePost(HttpExchange exchange, String path)
       throws JsonProcessingException, SQLException {
     if (path.matches(String.format("api/card/new/[0-9]{%d}", CardService.ACCOUNT_LENGTH))) {
-      return service.createNewCard(exchange, path.substring(path.lastIndexOf("/") + 1));
-    } else if (path.matches("api/card/get/all")) {
+      return service.createNewCard(exchange, extractAllAfterLastSlash(path));
+    }
+    return "";
+  }
+  
+  private String extractFieldFromRequestBody(HttpExchange exchange, JsonNode objectFromJson, String key) throws IOException {
+    String value = objectFromJson.get(key).textValue();
+    if ("number".equals(key) && value.length() != CardService.CARD_LENGTH) {
+      throw new IllegalArgumentException("Bad number: " + value);
+    }
+    return value;
+  }
+
+  private String handleGet(HttpExchange exchange, String path)
+      throws IOException, SQLException {
+    
+    //all needing nothing
+    if ("api/card/all".equals(path)) {
       return service.getAllCards();
-    } else if (path.matches("api/card/get/4000002698974233")) {
-      return service.getCard(exchange);
     }
-    switch (path) {
-      case "get": return service.getCard(exchange);
-      case "all": return service.listAllCards(exchange);
-      case "activate": return service.activateCard(exchange);
-      case "close": return service.closeCard(exchange);
-      default: {
-        return "";
-      }
+
+    //all needing mapper
+    JsonNode objectFromJson = new ObjectMapper().readTree(extractBody(exchange));
+    String number = extractFieldFromRequestBody(exchange, objectFromJson,"number");
+    
+    if ("api/card".equals(path)) {
+      return service.getCard(exchange, number);
+    } else if ("api/card/balance".equals(path)) {
+      return service.getCardBalance(exchange, number);
+    } else if ("api/card/activate".equals(path)) {
+      return service.activateCard(exchange, number);
+    } else if ("api/card/close".equals(path)) {
+      return service.closeCard(exchange, number);
+    } else if ("api/card/deposit".equals(path)) {
+      return service.deposit(exchange, number, extractFieldFromRequestBody(exchange, objectFromJson, "amount"));
     }
+
+    throw new IllegalArgumentException();
   }
 
   @Override
@@ -56,7 +99,7 @@ public class CardHandler implements HttpHandler {
     String path = exchange.getRequestURI().getPath();
     String response = null;
     try {
-      response = handleRequest(exchange, path.substring(path.indexOf("/") + 1));
+      response = handleGet(exchange, path.substring(path.indexOf("/") + 1));
     } catch (SQLException throwables) {
       throwables.printStackTrace();
     }

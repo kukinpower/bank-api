@@ -61,6 +61,14 @@ public class Card {
     return number;
   }
 
+  public void setBalance(BigDecimal balance) {
+    this.balance = balance;
+  }
+
+  public void setStatus(CardStatus status) {
+    this.status = status;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

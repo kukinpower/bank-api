@@ -36,6 +36,7 @@ public class CardDao implements BankDao<Card, String> {
   private static final String DELETE_CARD = "delete from card" +
       " where number = ? and pin = ?";
 
+  private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ?";
   private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ?" +
       " where number = ?";
 
@@ -85,9 +86,20 @@ public class CardDao implements BankDao<Card, String> {
   }
 
   @Override
-  public Card update(Card card, String[] params) {
-//    connection.setAutoCommit(false);
-    return null;
+  public Card update(Card card) throws SQLException {
+    try (Connection connection = dataSource.getConnection()) {
+      connection.setAutoCommit(false);
+
+      PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD);
+      preparedStatement.setBigDecimal(1, card.getBalance());
+      preparedStatement.setInt(2, card.getStatus().getCode());
+      preparedStatement.setString(3, card.getNumber());
+      preparedStatement.executeUpdate();
+
+      connection.commit();
+
+      return card;
+    }
   }
 
   @Override
@@ -121,7 +133,7 @@ public class CardDao implements BankDao<Card, String> {
 ////    preparedStatement.close();
 //  }
 
-//  private void addIncome() throws SQLException {
+  //  private void addIncome() throws SQLException {
 ////    System.out.println("Enter income:");
 ////    int income = scanner.nextInt();
 ////    updateCardBalance(currentNumber, BigDecimal.valueOf(income));

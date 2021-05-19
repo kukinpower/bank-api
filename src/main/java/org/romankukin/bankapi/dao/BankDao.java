@@ -9,7 +9,7 @@ public interface BankDao<T, K> {
 
   List<T> getAllEntities() throws SQLException;
 
-  T update(T t, String[] params);
+  T update(T t) throws SQLException;
 
   boolean create(T t) throws SQLException;
 
