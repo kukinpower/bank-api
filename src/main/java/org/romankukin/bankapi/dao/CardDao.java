@@ -50,7 +50,7 @@ public class CardDao implements BankDao<Card, String> {
     String pin = resultSet.getString("pin");
     String accountId = resultSet.getString("account");
     Currency currency = Currency.valueOf(resultSet.getString("currency"));
-    BigDecimal balance = BigDecimal.valueOf(resultSet.getDouble("balance"));
+    BigDecimal balance = resultSet.getBigDecimal("balance");
     CardStatus status = CardStatus.values()[resultSet.getInt("status") - 1];
     return new Card(number, pin, accountId, currency, balance, status);
   }
@@ -97,9 +97,9 @@ public class CardDao implements BankDao<Card, String> {
       PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD);
       preparedStatement.setString(1, card.getNumber());
       preparedStatement.setString(2, card.getPin());
-      preparedStatement.setString(3, card.getAccountNumber());
+      preparedStatement.setString(3, card.getAccount());
       preparedStatement.setString(4, card.getCurrency().toString());
-      preparedStatement.setDouble(5, card.getBalance().doubleValue());
+      preparedStatement.setBigDecimal(5, card.getBalance());
       preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
       preparedStatement.executeUpdate();
       preparedStatement.close();

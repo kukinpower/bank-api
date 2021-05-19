@@ -3,16 +3,17 @@ package org.romankukin.bankapi.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.sun.net.httpserver.HttpExchange;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
+import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.dao.BankDao;
-import org.romankukin.bankapi.dao.CardDao;
 import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
 import org.romankukin.bankapi.exception.SqlExceptionToMessageConverter;
@@ -109,10 +110,16 @@ public class CardService {
     return "card1, card2";
   }
 
-  public String getCard(HttpExchange exchange) throws SQLException {
-    Optional<Card> entity = dao.getEntity("1234567890123456");
+  public String getCard(HttpExchange exchange) throws SQLException, JsonProcessingException {
+    Optional<Card> entity = dao.getEntity("4000002698974233");
     if (entity.isPresent()) {
-      return entity.get().toString();
+      ObjectMapper mapper = new ObjectMapper();
+
+      SimpleModule module = new SimpleModule();
+      module.addSerializer(Card.class, new CardSerializer());
+      mapper.registerModule(module);
+
+      return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entity.get());
     } else {
       return "kek";
     }
@@ -126,4 +133,14 @@ public class CardService {
     return "card: closed";
   }
 
+  public String getAllCards() throws SQLException, JsonProcessingException {
+    List<Card> cards = dao.getAllEntities();
+    ObjectMapper mapper = new ObjectMapper();
+
+    SimpleModule module = new SimpleModule();
+    module.addSerializer(Card.class, new CardSerializer());
+    mapper.registerModule(module);
+
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(cards);
+  }
 }

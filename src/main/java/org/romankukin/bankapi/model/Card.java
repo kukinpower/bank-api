@@ -29,7 +29,7 @@ public class Card {
     this.status = status;
   }
 
-  public String getAccountNumber() {
+  public String getAccount() {
     return account;
   }
 

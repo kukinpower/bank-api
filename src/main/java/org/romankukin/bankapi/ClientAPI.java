@@ -27,7 +27,8 @@ public class ClientAPI {
 
   private void mapHandlers() {
     server.createContext("/api/hello", new HelloHandler());
-    server.createContext("/api/card/", new CardHandler((CardService) appContext.getBean("cardService")));
+    server.createContext("/api/card/",
+        new CardHandler((CardService) appContext.getBean("cardService")));
   }
 
   private String SCRIPT_PATH = "/Users/a19188182/development/bank-api/src/main/resources/script/create_table.sql";
@@ -41,14 +42,12 @@ public class ClientAPI {
 
   public void runServer() throws IOException, SQLException {
     initDatabase();
-    try (Connection connection = ((DataSource) appContext.getBean("dataSource")).getConnection()) {
-      server = HttpServer.create(new InetSocketAddress(PORT), BACKLOG);
-      ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
-      mapHandlers();
-      server.setExecutor(threadPoolExecutor);
-      server.start();
-      logger.info("Server started on port " + PORT);
-    }
+    server = HttpServer.create(new InetSocketAddress(PORT), BACKLOG);
+    ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+    mapHandlers();
+    server.setExecutor(threadPoolExecutor);
+    server.start();
+    logger.info("Server started on port " + PORT);
   }
 
   public static void main(String[] args) throws IOException, SQLException {
