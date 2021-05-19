@@ -1,6 +1,7 @@
 package org.romankukin.bankapi;
 
 import com.sun.net.httpserver.HttpServer;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -31,10 +32,16 @@ public class ClientAPI {
 
   private String SCRIPT_PATH = "/Users/a19188182/development/bank-api/src/main/resources/script/create_table.sql";
 
-  public void runServer() throws IOException, SQLException {
+  private void initDatabase() throws FileNotFoundException, SQLException {
     try (Connection connection = ((DataSource) appContext.getBean("dataSource")).getConnection()) {
       RunScript.execute(connection, new FileReader(SCRIPT_PATH));
+      logger.info("Database created");
+    }
+  }
 
+  public void runServer() throws IOException, SQLException {
+    initDatabase();
+    try (Connection connection = ((DataSource) appContext.getBean("dataSource")).getConnection()) {
       server = HttpServer.create(new InetSocketAddress(PORT), BACKLOG);
       ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
       mapHandlers();

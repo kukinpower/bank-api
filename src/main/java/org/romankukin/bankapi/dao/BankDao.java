@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface BankDao<T, K> {
   Optional<T> getEntity(K id) throws SQLException;
 
-  List<T> getAllEntities();
+  List<T> getAllEntities() throws SQLException;
 
   T update(T t, String[] params);
 

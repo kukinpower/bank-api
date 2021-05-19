@@ -1,7 +1,7 @@
 create table IF NOT EXISTS card
 (number char(16) NOT NULL primary key,
     pin char(4) NOT NULL,
-    account INTEGER NOT NULL,
+    account char(20) NOT NULL,
     currency char(3) NOT NULL,
     balance DECIMAL NOT NULL,
     status INTEGER NOT NULL);

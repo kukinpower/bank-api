@@ -1,6 +1,7 @@
 package org.romankukin.bankapi.model;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 //import org.romankukin.bankapi.BankAccount;
 
 public class Card {
@@ -8,7 +9,7 @@ public class Card {
   //  private final int cardId;//todo
   private final String number;
   private final String pin;
-  private Integer accountId;
+  private final String account;
   private final Currency currency;
   private BigDecimal balance;
   private CardStatus status;
@@ -16,20 +17,20 @@ public class Card {
   public Card(
       String number,
       String pin,
-      Integer accountId,
+      String account,
       Currency currency,
       BigDecimal balance,
       CardStatus status) {
     this.currency = currency;
     this.number = number;
-    this.accountId = accountId;
+    this.account = account;
     this.pin = pin;
     this.balance = balance;
     this.status = status;
   }
 
-  public Integer getAccountId() {
-    return accountId;
+  public String getAccountNumber() {
+    return account;
   }
 
   public Currency getCurrency() {
@@ -68,31 +69,25 @@ public class Card {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-
     Card card = (Card) o;
-
-    if (!pin.equals(card.pin)) {
-      return false;
-    }
-    if (!number.equals(card.number)) {
-      return false;
-    }
-    return balance.equals(card.balance);
+    return number.equals(card.number) && pin.equals(card.pin) && account.equals(card.account)
+        && currency == card.currency && balance.equals(card.balance) && status == card.status;
   }
 
   @Override
   public int hashCode() {
-    int result = pin.hashCode();
-    result = 31 * result + number.hashCode();
-    return result;
+    return Objects.hash(number, pin, account, currency, balance, status);
   }
 
   @Override
   public String toString() {
     return "Card{" +
-        "pin='" + pin + '\'' +
-        ", number='" + number + '\'' +
+        "number='" + number + '\'' +
+        ", pin='" + pin + '\'' +
+        ", account='" + account + '\'' +
+        ", currency=" + currency +
         ", balance=" + balance +
+        ", status=" + status +
         '}';
   }
 }

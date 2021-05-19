@@ -25,12 +25,13 @@ public class CardService {
   private final BankDao<Card, String> dao;
   public static final String BIN = "400000";
   public static int CARD_LENGTH = 16;
+  public static int ACCOUNT_LENGTH = 20;
 
   public CardService(BankDao<Card, String> dao) {
     this.dao = dao;
   }
 
-  private static String generateRandomIntSequenceStringOfLength(int length) {
+  public static String generateRandomIntSequenceStringOfLength(int length) {
     StringBuilder stringBuilder = new StringBuilder();
 
     ThreadLocalRandom random = ThreadLocalRandom.current();
@@ -77,13 +78,9 @@ public class CardService {
     return stringBuilder.toString();
   }
 
-//  public String createNewCard(HttpExchange exchange, String cardNumber) {
-//    createNewCard(exchange, new Card(cardNumber, generateCardPin(), 1, Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING));
-//  }
-
-  public String createNewCard(HttpExchange exchange, Integer account)
+  public String createNewCard(HttpExchange exchange, String accountNumber)
       throws JsonProcessingException, SQLException {
-    return createNewCard(exchange, new Card(generateCardNumber(), generateCardPin(), account, Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING));
+    return createNewCard(exchange, new Card(generateCardNumber(), generateCardPin(), accountNumber, Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING));
   }
 
   public String createNewCard(HttpExchange exchange, Card card)

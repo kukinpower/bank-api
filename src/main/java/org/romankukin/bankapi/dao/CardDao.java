@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -25,6 +26,7 @@ public class CardDao implements BankDao<Card, String> {
       + " balance INTEGER DEFAULT 0,"
       + "unique (number))";
   private final static String INSERT_CARD = "insert into card values(?, ?, ?, ?, ?, ?)";
+  private final static String GET_ALL_FROM_CARD = "select * from card";
   private final static String FIND_CARD = "select * from card"
       + " where number = '%s'";
   private final static String FIND_CARD_BY_NUMBER = "select * from card"
@@ -33,7 +35,6 @@ public class CardDao implements BankDao<Card, String> {
       + " where number = '%s' and pin = '%s'";
   private static final String DELETE_CARD = "delete from card" +
       " where number = ? and pin = ?";
-
 
   private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ?" +
       " where number = ?";
@@ -44,20 +45,24 @@ public class CardDao implements BankDao<Card, String> {
     this.dataSource = dataSource;
   }
 
+  private static Card extractCardFromResultSet(ResultSet resultSet) throws SQLException {
+    String number = resultSet.getString("number");
+    String pin = resultSet.getString("pin");
+    String accountId = resultSet.getString("account");
+    Currency currency = Currency.valueOf(resultSet.getString("currency"));
+    BigDecimal balance = BigDecimal.valueOf(resultSet.getDouble("balance"));
+    CardStatus status = CardStatus.values()[resultSet.getInt("status") - 1];
+    return new Card(number, pin, accountId, currency, balance, status);
+  }
+
   @Override
   public Optional<Card> getEntity(String numberId) {
     try (Connection connection = dataSource.getConnection()) {
       Statement statement = connection.createStatement();
       ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId));
       resultSet.next();
-      String number = resultSet.getString("number");
-      String pin = resultSet.getString("pin");
-      Integer accountId = resultSet.getInt("account");
-      Currency currency = Currency.valueOf(resultSet.getString("currency"));
-      BigDecimal balance = BigDecimal.valueOf(resultSet.getDouble("balance"));
-      CardStatus status = CardStatus.values()[resultSet.getInt("status") - 1];
 
-      return Optional.of(new Card(number, pin, accountId, currency, balance, status));
+      return Optional.of(extractCardFromResultSet(resultSet));
 
     } catch (SQLException e) {
       e.printStackTrace();
@@ -66,27 +71,39 @@ public class CardDao implements BankDao<Card, String> {
   }
 
   @Override
-  public List<Card> getAllEntities() {
-    return null;
+  public List<Card> getAllEntities() throws SQLException {
+    try (Connection connection = dataSource.getConnection()) {
+      Statement statement = connection.createStatement();
+      ResultSet resultSet = statement.executeQuery(GET_ALL_FROM_CARD);
+      List<Card> cards = new ArrayList<>();
+      while (resultSet.next()) {
+        cards.add(extractCardFromResultSet(resultSet));
+      }
+
+      return cards;
+    }
   }
 
   @Override
   public Card update(Card card, String[] params) {
+//    connection.setAutoCommit(false);
     return null;
   }
 
   @Override
   public boolean create(Card card) throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
+      connection.setAutoCommit(false);
       PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD);
       preparedStatement.setString(1, card.getNumber());
       preparedStatement.setString(2, card.getPin());
-      preparedStatement.setInt(3, card.getAccountId());
+      preparedStatement.setString(3, card.getAccountNumber());
       preparedStatement.setString(4, card.getCurrency().toString());
       preparedStatement.setDouble(5, card.getBalance().doubleValue());
       preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
       preparedStatement.executeUpdate();
       preparedStatement.close();
+      connection.commit();
       return true;
     }
   }

@@ -33,8 +33,8 @@ public class CardHandler implements HttpHandler {
 
   private String handleRequest(HttpExchange exchange, String path)
       throws JsonProcessingException, SQLException {
-    if (path.matches("api/card/new/[0-9]+")) {
-      return service.createNewCard(exchange, Integer.parseInt(path.substring(path.lastIndexOf("/") + 1)));
+    if (path.matches(String.format("api/card/new/[0-9]{%d}", CardService.ACCOUNT_LENGTH))) {
+      return service.createNewCard(exchange, path.substring(path.lastIndexOf("/") + 1));
     }
     switch (path) {
       case "get": return service.getCard(exchange);
