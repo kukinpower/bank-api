@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -23,17 +22,11 @@ import org.romankukin.bankapi.service.CardService;
 //4) Проверка баланса
 public class CardHandler implements HttpHandler {
 
-//  private static final BankDao<Card, Integer> dao = new CardDao();
-//  private BankService<Card, Integer> service;
   private final static Integer CARD_NUMBER_LENGTH = 16;
   private final CardService service;
 
   public CardHandler(CardService service) {
     this.service = service;
-  }
-
-  private void map() {
-
   }
 
   private void handleResponse(HttpExchange exchange, String response) throws IOException {
