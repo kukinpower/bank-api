@@ -9,12 +9,12 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
-import org.romankukin.bankapi.service.AbstractDao;
 
-public class CardDao extends AbstractDao implements BankDao<Card, String> {
+public class CardDao implements BankDao<Card, String> {
 
   private static final Logger logger = Logger.getLogger(CardDao.class.getName());
 
@@ -38,13 +38,16 @@ public class CardDao extends AbstractDao implements BankDao<Card, String> {
   private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ?" +
       " where number = ?";
 
-  public CardDao(Connection connection) {
-    super(connection);
+  private DataSource dataSource;
+
+  public CardDao(DataSource dataSource) {
+    this.dataSource = dataSource;
   }
 
   @Override
   public Optional<Card> getEntity(String numberId) {
-    try (Statement statement = connection.createStatement()) {
+    try (Connection connection = dataSource.getConnection()) {
+      Statement statement = connection.createStatement();
       ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId));
       resultSet.next();
       String number = resultSet.getString("number");
@@ -74,16 +77,18 @@ public class CardDao extends AbstractDao implements BankDao<Card, String> {
 
   @Override
   public boolean create(Card card) throws SQLException {
-    PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD);
-    preparedStatement.setString(1, card.getNumber());
-    preparedStatement.setString(2, card.getPin());
-    preparedStatement.setInt(3, card.getAccountId());
-    preparedStatement.setString(4, card.getCurrency().toString());
-    preparedStatement.setDouble(5, card.getBalance().doubleValue());
-    preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
-    preparedStatement.executeUpdate();
-    preparedStatement.close();
-    return true;
+    try (Connection connection = dataSource.getConnection()) {
+      PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD);
+      preparedStatement.setString(1, card.getNumber());
+      preparedStatement.setString(2, card.getPin());
+      preparedStatement.setInt(3, card.getAccountId());
+      preparedStatement.setString(4, card.getCurrency().toString());
+      preparedStatement.setDouble(5, card.getBalance().doubleValue());
+      preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
+      preparedStatement.executeUpdate();
+      preparedStatement.close();
+      return true;
+    }
   }
 
   @Override
@@ -118,30 +123,30 @@ public class CardDao extends AbstractDao implements BankDao<Card, String> {
 //    return true;
 //  }
 //
-//  private void doTransfer() throws SQLException {
-////    System.out.println("Transfer");
-////    System.out.println("Enter card number:");
-////    String cardNumber = scanner.next();
-////    if (!cardNumber.startsWith("400000")
-////        || cardNumber.length() != CardService.CARD_LENGTH
-////        || !CardService.isValidCardNumberLuhnlgorithm(cardNumber)) {
-////      System.out.println("Probably you made a mistake in the card number. Please try again!");
-////    } else if (!findCardInDatabaseByNumber(cardNumber)) {
-////      System.out.println("Such a card does not exist.");
-////    } else {
-////      System.out.println("Enter how much money you want to transfer:");
-////      int amount = scanner.nextInt();
-////      if (queryCardBalance(currentNumber, currentPin) < amount) {
-////        System.out.println("Not enough money!");
-////      } else {
-////        connection.setAutoCommit(false);
-////        updateCardBalance(cardNumber, BigDecimal.valueOf(amount));
-////        updateCardBalance(currentNumber, BigDecimal.valueOf(-amount));
-////        connection.commit();
-////        System.out.println("Success!");
-////      }
-////    }
-//  }
+  private void doTransfer() throws SQLException {
+//    System.out.println("Transfer");
+//    System.out.println("Enter card number:");
+//    String cardNumber = scanner.next();
+//    if (!cardNumber.startsWith("400000")
+//        || cardNumber.length() != CardService.CARD_LENGTH
+//        || !CardService.isValidCardNumberLuhnlgorithm(cardNumber)) {
+//      System.out.println("Probably you made a mistake in the card number. Please try again!");
+//    } else if (!findCardInDatabaseByNumber(cardNumber)) {
+//      System.out.println("Such a card does not exist.");
+//    } else {
+//      System.out.println("Enter how much money you want to transfer:");
+//      int amount = scanner.nextInt();
+//      if (queryCardBalance(currentNumber, currentPin) < amount) {
+//        System.out.println("Not enough money!");
+//      } else {
+//        connection.setAutoCommit(false);
+//        updateCardBalance(cardNumber, BigDecimal.valueOf(amount));
+//        updateCardBalance(currentNumber, BigDecimal.valueOf(-amount));
+//        connection.commit();
+//        System.out.println("Success!");
+//      }
+//    }
+  }
 //
 //  private void deleteCardFromDatabase(String number, String pin) throws SQLException {
 ////    PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CARD);

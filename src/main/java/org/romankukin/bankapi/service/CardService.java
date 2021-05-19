@@ -82,12 +82,12 @@ public class CardService {
 //  }
 
   public String createNewCard(HttpExchange exchange, Integer account)
-      throws JsonProcessingException {
+      throws JsonProcessingException, SQLException {
     return createNewCard(exchange, new Card(generateCardNumber(), generateCardPin(), account, Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING));
   }
 
   public String createNewCard(HttpExchange exchange, Card card)
-      throws JsonProcessingException {
+      throws JsonProcessingException, SQLException {
 
     try {
       if (dao.create(card)) {
@@ -112,7 +112,7 @@ public class CardService {
     return "card1, card2";
   }
 
-  public String getCard(HttpExchange exchange) {
+  public String getCard(HttpExchange exchange) throws SQLException {
     Optional<Card> entity = dao.getEntity("1234567890123456");
     if (entity.isPresent()) {
       return entity.get().toString();
