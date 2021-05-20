@@ -18,7 +18,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.controller.scheme.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.scheme.CardStatusUpdateRequest;
-import org.romankukin.bankapi.dao.BankDao;
 import org.romankukin.bankapi.dao.CardDao;
 import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
