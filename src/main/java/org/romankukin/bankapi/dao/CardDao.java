@@ -60,12 +60,13 @@ public class CardDao implements BankDao<Card, String> {
   @Override
   public Optional<Card> getEntity(String numberId) {
     try (Connection connection = dataSource.getConnection()) {
-      Statement statement = connection.createStatement();
-      ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId));
-      resultSet.next();
+      try (Statement statement = connection.createStatement()) {
+        try (ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId))) {
+          resultSet.next();
 
-      return Optional.of(extractCardFromResultSet(resultSet));
-
+          return Optional.of(extractCardFromResultSet(resultSet));
+        }
+      }
     } catch (SQLException e) {
       e.printStackTrace();
       return Optional.empty();
@@ -75,14 +76,15 @@ public class CardDao implements BankDao<Card, String> {
   @Override
   public List<Card> getAllEntities() throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
-      Statement statement = connection.createStatement();
-      ResultSet resultSet = statement.executeQuery(GET_ALL_FROM_CARD);
-      List<Card> cards = new ArrayList<>();
-      while (resultSet.next()) {
-        cards.add(extractCardFromResultSet(resultSet));
+      try (Statement statement = connection.createStatement()) {
+        try (ResultSet resultSet = statement.executeQuery(GET_ALL_FROM_CARD)) {
+          List<Card> cards = new ArrayList<>();
+          while (resultSet.next()) {
+            cards.add(extractCardFromResultSet(resultSet));
+          }
+          return cards;
+        }
       }
-
-      return cards;
     }
   }
 
@@ -90,19 +92,20 @@ public class CardDao implements BankDao<Card, String> {
   public Card update(Card card) throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
       connection.setAutoCommit(false);
-      PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD);
-      preparedStatement.setBigDecimal(1, card.getBalance());
+      try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD)) {
+        preparedStatement.setBigDecimal(1, card.getBalance());
 
-      if (card.getStatus() == CardStatus.PENDING) {
-        card.setStatus(CardStatus.ACTIVE);
+        if (card.getStatus() == CardStatus.PENDING) {
+          card.setStatus(CardStatus.ACTIVE);
+        }
+        preparedStatement.setInt(2, card.getStatus().getCode());
+        preparedStatement.setString(3, card.getNumber());
+        preparedStatement.executeUpdate();
+
+        connection.commit();
+
+        return card;
       }
-      preparedStatement.setInt(2, card.getStatus().getCode());
-      preparedStatement.setString(3, card.getNumber());
-      preparedStatement.executeUpdate();
-
-      connection.commit();
-
-      return card;
     }
   }
 
@@ -110,17 +113,18 @@ public class CardDao implements BankDao<Card, String> {
   public boolean create(Card card) throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
       connection.setAutoCommit(false);
-      PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD);
-      preparedStatement.setString(1, card.getNumber());
-      preparedStatement.setString(2, card.getPin());
-      preparedStatement.setString(3, card.getAccount());
-      preparedStatement.setString(4, card.getCurrency().toString());
-      preparedStatement.setBigDecimal(5, card.getBalance());
-      preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
-      preparedStatement.executeUpdate();
-      preparedStatement.close();
-      connection.commit();
-      return true;
+      try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD)) {
+        preparedStatement.setString(1, card.getNumber());
+        preparedStatement.setString(2, card.getPin());
+        preparedStatement.setString(3, card.getAccount());
+        preparedStatement.setString(4, card.getCurrency().toString());
+        preparedStatement.setBigDecimal(5, card.getBalance());
+        preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+        connection.commit();
+        return true;
+      }
     }
   }
 
