@@ -12,4 +12,8 @@ public enum CardStatus {
   public int getCode() {
     return code;
   }
+
+  public static CardStatus getCardStatusById(int id) {
+    return CardStatus.values()[id - 1];
+  }
 }

@@ -1,11 +1,13 @@
 package org.romankukin.bankapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -14,6 +16,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
+import org.romankukin.bankapi.controller.scheme.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.controller.scheme.CardStatusUpdateRequest;
+import org.romankukin.bankapi.controller.scheme.CardUpdateRequest;
 import org.romankukin.bankapi.dao.BankDao;
 import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
@@ -23,7 +28,7 @@ import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
 
-public class CardService {
+public class CardService implements BankService {
 
   private final BankDao<Card, String> dao;
   private final ObjectMapper mapper;
@@ -92,10 +97,18 @@ public class CardService {
     return stringBuilder.toString();
   }
 
-  public String createNewCard(HttpExchange exchange, String accountNumber)
-      throws JsonProcessingException, SQLException {
+  public String createNewCard(HttpExchange exchange, JsonNode objectFromJson)
+      throws IOException, SQLException {
+    String accountNumber = extractFieldFromRequestBody(exchange, objectFromJson,"number");
+    String currencyStringIndex = extractFieldFromRequestBody(exchange, objectFromJson, "currency");
+    Currency currency = Currency.RUB;
+    try {
+      currency = Currency.values()[Integer.parseInt(currencyStringIndex) - 1];
+    } catch (IndexOutOfBoundsException | NullPointerException e) {
+      e.printStackTrace();
+    }
     return createNewCard(exchange,
-        new Card(generateCardNumber(), generateCardPin(), accountNumber, Currency.RUB,
+        new Card(generateCardNumber(), generateCardPin(), accountNumber, currency,
             BigDecimal.ZERO, CardStatus.PENDING));
   }
 
@@ -141,24 +154,19 @@ public class CardService {
     }
   }
 
-  private String updateCardStatus(HttpExchange exchange, String cardNumber, CardStatus cardStatus)
+  public String updateCardStatus(HttpExchange exchange, CardStatusUpdateRequest cardStatusUpdate)
       throws SQLException, JsonProcessingException {
-    Optional<Card> entity = dao.getEntity(cardNumber);
+    Optional<Card> entity = dao.getEntity(cardStatusUpdate.getNumber());
     if (entity.isPresent()) {
       Card card = entity.get();
-      card.setStatus(cardStatus);
+      card.setStatus(CardStatus.getCardStatusById(cardStatusUpdate.getStatus()));
       card = dao.update(card);
 
       return cardToJson(card);
 
     } else {
-      throw new NoSuchEntityException("no card with number: " + cardNumber);
+      throw new NoSuchEntityException("no card with number: " + cardStatusUpdate.getNumber());
     }
-  }
-
-  public String activateCard(HttpExchange exchange, String cardNumber)
-      throws SQLException, JsonProcessingException {
-    return updateCardStatus(exchange, cardNumber, CardStatus.ACTIVE);
   }
 
   public String getCardBalance(HttpExchange exchange, String cardNumber) throws SQLException {
@@ -168,11 +176,6 @@ public class CardService {
     } else {
       throw new NoSuchEntityException("no card with number: " + cardNumber);
     }
-  }
-
-  public String closeCard(HttpExchange exchange, String cardNumber)
-      throws SQLException, JsonProcessingException {
-    return updateCardStatus(exchange, cardNumber, CardStatus.CLOSED);
   }
 
   public String getAllCards() throws SQLException, JsonProcessingException {
@@ -187,18 +190,18 @@ public class CardService {
     return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(card);
   }
 
-  public String deposit(HttpExchange exchange, String cardNumber, String amount)
+  public String deposit(HttpExchange exchange, CardBalanceUpdateRequest cardBalanceUpdate)
       throws SQLException, JsonProcessingException {
-    Optional<Card> entity = dao.getEntity(cardNumber);
+    Optional<Card> entity = dao.getEntity(cardBalanceUpdate.getNumber());
     if (entity.isPresent()) {
       Card card = entity.get();
       if (card.getStatus() == CardStatus.CLOSED) {
-        throw new CardClosedException("Card " + cardNumber + " is closed");
+        throw new CardClosedException("Card " + cardBalanceUpdate.getNumber() + " is closed");
       }
-      card.setBalance(card.getBalance().add(BigDecimal.valueOf(Double.parseDouble(amount))));
+      card.setBalance(card.getBalance().add(cardBalanceUpdate.getAmount()));
       return cardToJson(dao.update(card));
     } else {
-      throw new NoSuchEntityException("no card with number: " + cardNumber);
+      throw new NoSuchEntityException("no card with number: " + cardBalanceUpdate.getNumber());
     }
   }
 }
