@@ -1,23 +1,13 @@
 package org.romankukin.bankapi.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpPrincipal;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import org.everit.json.schema.Schema;
-import org.everit.json.schema.ValidationException;
-import org.everit.json.schema.loader.SchemaLoader;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.romankukin.bankapi.controller.scheme.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.scheme.CardStatusUpdateRequest;
 import org.romankukin.bankapi.controller.scheme.CardUpdateRequest;
@@ -116,7 +106,7 @@ public class CardHandler implements HttpHandler, BankHandler {
   }
 
   private String handleGet(HttpExchange exchange, String path)
-      throws IOException, SQLException, ValidationException {
+      throws IOException, SQLException {
     //all needing nothing
     if ("api/card/all".equals(path)) {
       return service.getAllCards();
