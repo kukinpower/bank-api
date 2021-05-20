@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.dao.BankDao;
+import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
 import org.romankukin.bankapi.exception.SqlExceptionToMessageConverter;
@@ -191,6 +192,9 @@ public class CardService {
     Optional<Card> entity = dao.getEntity(cardNumber);
     if (entity.isPresent()) {
       Card card = entity.get();
+      if (card.getStatus() == CardStatus.CLOSED) {
+        throw new CardClosedException("Card " + cardNumber + " is closed");
+      }
       card.setBalance(card.getBalance().add(BigDecimal.valueOf(Double.parseDouble(amount))));
       return cardToJson(dao.update(card));
     } else {
