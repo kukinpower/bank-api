@@ -134,17 +134,17 @@ public class CardHandler implements HttpHandler, BankHandler {
       } else if ("POST".equals(exchange.getRequestMethod())) {
         response = handlePost(exchange, path);
       }
+      if (response == null) {
+        handleErrorResponse(exchange, new IllegalArgumentException());
+      } else {
+        handleResponse(exchange, response);
+      }
     } catch (SQLException e) {
       e.printStackTrace();
       handleErrorResponse(exchange, e);
     } catch (Exception e) {
+      e.printStackTrace();
       handleErrorResponse(exchange, e);
-    }
-
-    if (response == null) {
-      handleErrorResponse(exchange, new IllegalArgumentException());
-    } else {
-      handleResponse(exchange, response);
     }
     exchange.close();
   }

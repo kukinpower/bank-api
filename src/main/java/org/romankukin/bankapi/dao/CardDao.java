@@ -1,5 +1,6 @@
 package org.romankukin.bankapi.dao;
 
+import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import org.romankukin.bankapi.controller.scheme.CardStatusUpdateRequest;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
@@ -37,6 +39,7 @@ public class CardDao implements BankDao<Card, String> {
       " where number = ? and pin = ?";
 
   private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ?";
+  private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ?";
   private static final String UPDATE_CARD_FIELD = "update card set %s = ? where number = ?";
   private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ?" +
       " where number = ?";
@@ -53,7 +56,7 @@ public class CardDao implements BankDao<Card, String> {
     String accountId = resultSet.getString("account");
     Currency currency = Currency.valueOf(resultSet.getString("currency"));
     BigDecimal balance = resultSet.getBigDecimal("balance");
-    CardStatus status = CardStatus.values()[resultSet.getInt("status") - 1];
+    CardStatus status = CardStatus.getCardStatusById(resultSet.getInt("status"));
     return new Card(number, pin, accountId, currency, balance, status);
   }
 
@@ -84,6 +87,25 @@ public class CardDao implements BankDao<Card, String> {
           }
           return cards;
         }
+      }
+    }
+  }
+
+  public Card updateCardStatus(CardStatusUpdateRequest cardStatusUpdateRequest) throws SQLException {
+    try (Connection connection = dataSource.getConnection()) {
+      connection.setAutoCommit(false);
+      try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_STATUS)) {
+        preparedStatement.setInt(1, cardStatusUpdateRequest.getStatus());
+        preparedStatement.setString(2, cardStatusUpdateRequest.getNumber());
+        preparedStatement.executeUpdate();
+
+        connection.commit();
+
+        Optional<Card> entity = getEntity(cardStatusUpdateRequest.getNumber());
+        if (entity.isPresent()) {
+          return entity.get();
+        }
+        throw new NoSuchEntityException("no such entity with number: " + cardStatusUpdateRequest.getNumber());
       }
     }
   }

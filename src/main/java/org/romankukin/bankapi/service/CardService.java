@@ -18,8 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.controller.scheme.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.scheme.CardStatusUpdateRequest;
-import org.romankukin.bankapi.controller.scheme.CardUpdateRequest;
 import org.romankukin.bankapi.dao.BankDao;
+import org.romankukin.bankapi.dao.CardDao;
 import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
@@ -30,13 +30,13 @@ import org.romankukin.bankapi.model.Currency;
 
 public class CardService implements BankService {
 
-  private final BankDao<Card, String> dao;
+  private final CardDao dao;
   private final ObjectMapper mapper;
   public static final String BIN = "400000";
   public static int CARD_LENGTH = 16;
   public static int ACCOUNT_LENGTH = 20;
 
-  public CardService(BankDao<Card, String> dao) {
+  public CardService(CardDao dao) {
     this.dao = dao;
     this.mapper = createCardObjectMapper();
   }
@@ -158,9 +158,7 @@ public class CardService implements BankService {
       throws SQLException, JsonProcessingException {
     Optional<Card> entity = dao.getEntity(cardStatusUpdate.getNumber());
     if (entity.isPresent()) {
-      Card card = entity.get();
-      card.setStatus(CardStatus.getCardStatusById(cardStatusUpdate.getStatus()));
-      card = dao.update(card);
+      Card card = dao.updateCardStatus(cardStatusUpdate);
 
       return cardToJson(card);
 
