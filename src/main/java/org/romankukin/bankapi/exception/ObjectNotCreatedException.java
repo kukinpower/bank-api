@@ -1,7 +1,5 @@
 package org.romankukin.bankapi.exception;
 
-import java.sql.SQLException;
-
 public class ObjectNotCreatedException extends RuntimeException {
 
   private static final String MESSAGE = "Couldn't create an object: ";
