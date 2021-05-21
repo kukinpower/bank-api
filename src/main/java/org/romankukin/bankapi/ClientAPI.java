@@ -1,6 +1,8 @@
 package org.romankukin.bankapi;
 
 import com.sun.net.httpserver.HttpServer;
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -9,7 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.h2.tools.RunScript;
 import org.romankukin.bankapi.context.AppContext;
@@ -21,7 +22,7 @@ public class ClientAPI {
 
   private static final int PORT = 8080;
   private static final int BACKLOG = 0;
-  private static final Logger logger = Logger.getLogger(ClientAPI.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ClientAPI.class);
   private HttpServer server;
   private static final AppContext appContext = new AppContext();
 
@@ -36,7 +37,7 @@ public class ClientAPI {
   private void initDatabase() throws FileNotFoundException, SQLException {
     try (Connection connection = ((DataSource) appContext.getBean("dataSource")).getConnection()) {
       RunScript.execute(connection, new FileReader(SCRIPT_PATH));
-      logger.info("Database created");
+      logger.debug("Database created");
     }
   }
 
@@ -47,7 +48,7 @@ public class ClientAPI {
     mapHandlers();
     server.setExecutor(threadPoolExecutor);
     server.start();
-    logger.info("Server started on port " + PORT);
+    logger.debug("Server started on port " + PORT);
   }
 
   public static void main(String[] args) throws IOException, SQLException {

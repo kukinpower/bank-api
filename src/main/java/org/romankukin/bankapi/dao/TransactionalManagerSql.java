@@ -1,18 +1,18 @@
 package org.romankukin.bankapi.dao;
 
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.function.Supplier;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
-import org.romankukin.bankapi.dao.card.SupplierThrows;
+import org.romankukin.bankapi.dao.card.SupplierDao;
 import org.romankukin.bankapi.exception.TransactionFailedException;
 
 public class TransactionalManagerSql implements TransactionalManager {
 
   private final DataSource dataSource;
-  private static final Logger logger = Logger.getLogger(TransactionalManagerSql.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(TransactionalManagerSql.class);
   private static final String SAVEPOINT_TRANSACTION_START = "Start of transaction";
   private static final String TRANSACTION_START = "Transaction started";
   private static final String TRANSACTION_FINISH = "Transaction finished successful";
@@ -23,27 +23,52 @@ public class TransactionalManagerSql implements TransactionalManager {
   public TransactionalManagerSql(DataSource dataSource) {
     this.dataSource = dataSource;
   }
-
+//
+//  @Override
+//  public <T> T doTransaction(SupplierDao<T> action) throws SQLException {
+//    Connection connection = null;
+//    Savepoint savepoint = null;
+//    try {
+//      connection = dataSource.getConnection();
+//      connection.setAutoCommit(false);
+//      savepoint = connection.setSavepoint(SAVEPOINT_TRANSACTION_START);
+//      logger.info(TRANSACTION_START);
+//      T res = action.get(connection);
+//      connection.commit();
+//      logger.info(TRANSACTION_FINISH);
+//      return res;
+//    } catch (SQLException e) {
+//      logger.warning(WARN_TRANSACTION + e.getMessage());
+//      if (connection != null) {
+//        connection.rollback(savepoint);
+//        logger.info(TRANSACTION_ROLLBACK);
+//      } else {
+//        logger.warning(CONNECTION_NULL);
+//      }
+//      throw new TransactionFailedException(e);
+//    }
+//  }
+//
   @Override
-  public <T> T doTransaction(SupplierThrows<T> action) throws SQLException {
+  public <T> T doTransaction(SupplierDao<T> action) throws SQLException {
     Connection connection = null;
     Savepoint savepoint = null;
     try {
       connection = dataSource.getConnection();
       connection.setAutoCommit(false);
       savepoint = connection.setSavepoint(SAVEPOINT_TRANSACTION_START);
-      logger.info(TRANSACTION_START);
-      T res = action.get(connection);
+      logger.debug(TRANSACTION_START);
+      T res = action.execute(connection);
       connection.commit();
-      logger.info(TRANSACTION_FINISH);
+      logger.debug(TRANSACTION_FINISH);
       return res;
     } catch (SQLException e) {
-      logger.warning(WARN_TRANSACTION + e.getMessage());
+      logger.error(WARN_TRANSACTION + e.getMessage());
       if (connection != null) {
         connection.rollback(savepoint);
-        logger.info(TRANSACTION_ROLLBACK);
+        logger.error(TRANSACTION_ROLLBACK);
       } else {
-        logger.warning(CONNECTION_NULL);
+        logger.error(CONNECTION_NULL);
       }
       throw new TransactionFailedException(e);
     }
@@ -57,17 +82,17 @@ public class TransactionalManagerSql implements TransactionalManager {
       connection = dataSource.getConnection();
       connection.setAutoCommit(false);
       savepoint = connection.setSavepoint(SAVEPOINT_TRANSACTION_START);
-      logger.info(TRANSACTION_START);
+      logger.debug(TRANSACTION_START);
       action.run();
       connection.commit();
-      logger.info(TRANSACTION_FINISH);
+      logger.debug(TRANSACTION_FINISH);
     } catch (SQLException e) {
-      logger.warning(WARN_TRANSACTION + e.getMessage());
+      logger.error(WARN_TRANSACTION + e.getMessage());
       if (connection != null) {
         connection.rollback(savepoint);
-        logger.info(TRANSACTION_ROLLBACK);
+        logger.error(TRANSACTION_ROLLBACK);
       } else {
-        logger.warning(CONNECTION_NULL);
+        logger.error(CONNECTION_NULL);
       }
       throw new TransactionFailedException(e);
     }

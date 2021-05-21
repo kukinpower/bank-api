@@ -1,12 +1,11 @@
 package org.romankukin.bankapi.dao;
 
 import java.sql.SQLException;
-import java.util.function.Supplier;
-import org.romankukin.bankapi.dao.card.SupplierThrows;
+import org.romankukin.bankapi.dao.card.SupplierDao;
 
 public interface TransactionalManager {
 
-  <T> T doTransaction(SupplierThrows<T> action) throws SQLException;
+  <T> T doTransaction(SupplierDao<T> action) throws SQLException;
 
   void doTransaction(Runnable action) throws SQLException;
 }

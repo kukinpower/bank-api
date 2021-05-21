@@ -9,7 +9,7 @@ public interface CardDao<T, K> {
 
   List<T> getAllEntities() throws SQLException;
 
-  T update(T t) throws SQLException;
+  T update(T t);
 
   boolean create(T t) throws SQLException;
 

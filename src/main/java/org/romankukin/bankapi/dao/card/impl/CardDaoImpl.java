@@ -1,5 +1,7 @@
 package org.romankukin.bankapi.dao.card.impl;
 
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -10,17 +12,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
-import org.romankukin.bankapi.dao.card.CardDao;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
 
-public class CardDaoImpl implements CardDao<Card, String> {
+//public class CardDaoImpl implements CardDao<Card, String> {
+public class CardDaoImpl {
 
-  private static final Logger logger = Logger.getLogger(CardDaoImpl.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(CardDaoImpl.class);
 
   private final static String CREATE_TABLE = "create table IF NOT EXISTS card"
       + " (id INTEGER auto_increment primary key,"
@@ -61,7 +62,7 @@ public class CardDaoImpl implements CardDao<Card, String> {
     return new Card(number, pin, accountId, currency, balance, status);
   }
 
-  @Override
+
   public Optional<Card> getEntity(String numberId) {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
@@ -77,7 +78,7 @@ public class CardDaoImpl implements CardDao<Card, String> {
     }
   }
 
-  @Override
+
   public List<Card> getAllEntities() throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
@@ -92,7 +93,8 @@ public class CardDaoImpl implements CardDao<Card, String> {
     }
   }
 
-  public Card updateCardStatus(CardStatusUpdateRequest cardStatusUpdateRequest) throws SQLException {
+  public Card updateCardStatus(CardStatusUpdateRequest cardStatusUpdateRequest)
+      throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
       connection.setAutoCommit(false);
       try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_STATUS)) {
@@ -106,33 +108,32 @@ public class CardDaoImpl implements CardDao<Card, String> {
         if (entity.isPresent()) {
           return entity.get();
         }
-        throw new NoSuchEntityException("no such entity with number: " + cardStatusUpdateRequest.getNumber());
+        throw new NoSuchEntityException(
+            "no such entity with number: " + cardStatusUpdateRequest.getNumber());
       }
     }
   }
 
-  @Override
-  public Card update(Card card) {
-//    try (Connection connection = dataSource.getConnection()) {
-//      connection.setAutoCommit(false);
-      try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD)) {
-        preparedStatement.setBigDecimal(1, card.getBalance());
 
-        if (card.getStatus() == CardStatus.PENDING) {
-          card.setStatus(CardStatus.ACTIVE);
-        }
-        preparedStatement.setInt(2, card.getStatus().getCode());
-        preparedStatement.setString(3, card.getNumber());
-        preparedStatement.executeUpdate();
+  public Card update(Connection connection, Card card) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD)) {
+      preparedStatement.setBigDecimal(1, card.getBalance());
 
-//        connection.commit();
-
-        return card;
+      if (card.getStatus() == CardStatus.PENDING) {
+        card.setStatus(CardStatus.ACTIVE);
       }
+      preparedStatement.setInt(2, card.getStatus().getCode());
+      preparedStatement.setString(3, card.getNumber());
+      preparedStatement.executeUpdate();
+
+      return card;
+    } catch (SQLException e) {
+      e.printStackTrace();
     }
+    throw new RuntimeException();
   }
 
-  @Override
+
   public boolean create(Card card) throws SQLException {
     try (Connection connection = dataSource.getConnection()) {
       connection.setAutoCommit(false);
@@ -151,7 +152,7 @@ public class CardDaoImpl implements CardDao<Card, String> {
     }
   }
 
-  @Override
+
   public boolean delete(Card card) {
     return false;
   }

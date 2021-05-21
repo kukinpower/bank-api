@@ -197,7 +197,8 @@ public class CardServiceImpl implements CardService {
         throw new CardClosedException("Card " + cardBalanceUpdate.getNumber() + " is closed");
       }
       card.setBalance(card.getBalance().add(cardBalanceUpdate.getAmount()));
-      return cardToJson(transactionalManager.doTransaction(() -> dao.update(card)));
+      Card card1 = transactionalManager.doTransaction((connection) -> dao.update(connection, card));
+      return cardToJson(card1);
 //      return cardToJson(dao.update(card));
     } else {
       throw new NoSuchEntityException("no card with number: " + cardBalanceUpdate.getNumber());
