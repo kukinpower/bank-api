@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
+import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dao.Dao;
 import org.romankukin.bankapi.dao.card.CardDao;
@@ -33,20 +34,17 @@ public class CardDaoImpl implements CardDao, Dao {
       + "unique (number))";
   private final static String INSERT_CARD = "insert into card values(?, ?, ?, ?, ?, ?)";
   private final static String GET_ALL_FROM_CARD = "select * from card";
-  private final static String FIND_CARD = "select * from card"
-      + " where number = '%s'";
+  private final static String FIND_CARD = "select * from card where number = '%s'";
   private final static String FIND_CARD_BY_NUMBER = "select * from card"
       + " where number = '%s'";
-  private final static String GET_CARD_BALANCE = "select balance from card"
-      + " where number = '%s' and pin = '%s'";
+  private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
   private static final String DELETE_CARD = "delete from card" +
       " where number = ? and pin = ?";
 
   private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ?";
   private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ?";
   private static final String UPDATE_CARD_FIELD = "update card set %s = ? where number = ?";
-  private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ?" +
-      " where number = ?";
+  private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ? where number = ?";
 
   private DataSource dataSource;
 
@@ -65,13 +63,28 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public Optional<Card> getEntity(String numberId) {
+  public Optional<Card> getCard(String numberId) {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
         try (ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId))) {
           resultSet.next();
 
           return Optional.of(extractCardFromResultSet(resultSet));
+        }
+      }
+    } catch (SQLException e) {
+      logger.error(e.getMessage());
+      throw new DatabaseQueryException();
+    }
+  }
+
+  public BigDecimal getCardBalance(String numberId) {
+    try (Connection connection = dataSource.getConnection()) {
+      try (Statement statement = connection.createStatement()) {
+        try (ResultSet resultSet = statement.executeQuery(String.format(GET_CARD_BALANCE, numberId))) {
+          resultSet.next();
+
+          return resultSet.getBigDecimal(1);
         }
       }
     } catch (SQLException e) {
@@ -100,19 +113,31 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public Card updateCardStatus(Connection connection,
+  public CardStatusUpdateRequest updateCardStatus(Connection connection,
       CardStatusUpdateRequest cardStatusUpdateRequest) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_STATUS)) {
       preparedStatement.setInt(1, cardStatusUpdateRequest.getStatus());
       preparedStatement.setString(2, cardStatusUpdateRequest.getNumber());
       preparedStatement.executeUpdate();
+      return cardStatusUpdateRequest;
+    } catch (SQLException e) {
+      logger.error(e.getMessage());
+      throw new DatabaseQueryException();
+    }
+  }
 
-      Optional<Card> entity = getEntity(cardStatusUpdateRequest.getNumber());
+  public CardBalanceUpdateRequest updateCardBalance(Connection connection, CardBalanceUpdateRequest cardBalanceUpdateRequest) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_BALANCE)) {
+      preparedStatement.setBigDecimal(1, cardBalanceUpdateRequest.getAmount());
+      preparedStatement.setString(2, cardBalanceUpdateRequest.getNumber());
+      preparedStatement.executeUpdate();
+
+      Optional<Card> entity = getCard(cardBalanceUpdateRequest.getNumber());
       if (entity.isPresent()) {
         return entity.get();
       }
       throw new NoSuchEntityException(
-          "no such entity with number: " + cardStatusUpdateRequest.getNumber());
+          "no such entity with number: " + cardBalanceUpdateRequest.getNumber());
     } catch (SQLException e) {
       logger.error(e.getMessage());
       throw new DatabaseQueryException();
@@ -120,7 +145,7 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public Card update(Connection connection, Card card) {
+  public Card updateCard(Connection connection, Card card) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD)) {
       preparedStatement.setBigDecimal(1, card.getBalance());
 
@@ -139,7 +164,7 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public boolean create(Connection connection, Card card) {
+  public boolean createCard(Connection connection, Card card) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD)) {
       preparedStatement.setString(1, card.getNumber());
       preparedStatement.setString(2, card.getPin());
@@ -156,7 +181,7 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public boolean delete(Connection connection, Card card) {
+  public boolean deleteCard(Connection connection, Card card) {
     return false;
   }
 }

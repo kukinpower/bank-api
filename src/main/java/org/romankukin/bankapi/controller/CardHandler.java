@@ -55,23 +55,18 @@ public class CardHandler extends BankHandler implements HttpHandler {
       throws IOException, SQLException {
 
     switch (path) {
-//      case "api/card":
-//        return service.createNewCard(ex, extractObjectFromJson(ex, CardBalanceUpdateRequest.class))
+      case "api/card":
+        return service.createNewCard(extractObjectFromJson(ex, CardBalanceUpdateRequest.class));
       case "api/card/activate":
-        return service.updateCardStatus(ex, createCardUpdateStatus(ex, CardStatus.ACTIVE));
+        return service.updateCardStatus(createCardUpdateStatus(ex, CardStatus.ACTIVE));
       case "api/card/close":
-        return service.updateCardStatus(ex, createCardUpdateStatus(ex, CardStatus.CLOSED));
+        return service.updateCardStatus(createCardUpdateStatus(ex, CardStatus.CLOSED));
       case "api/card/status":
-        return service.updateCardStatus(ex, extractObjectFromJson(ex, CardStatusUpdateRequest.class));
+        return service.updateCardStatus(extractObjectFromJson(ex, CardStatusUpdateRequest.class));
       case "api/card/deposit":
-        return service.deposit(ex, extractObjectFromJson(ex, CardBalanceUpdateRequest.class));
+        return service.deposit(extractObjectFromJson(ex, CardBalanceUpdateRequest.class));
     }
 
-    //all needing mapper
-
-//    else if ("api/card".equals(path)) {
-//      return service.createNewCard(exchange, objectFromJson);
-//    }
     throw new IllegalArgumentException();
   }
 
@@ -84,12 +79,13 @@ public class CardHandler extends BankHandler implements HttpHandler {
 
     //all needing params
     Map<String, String> params = getParametersFromQuery(exchange);
-    if ("api/card".equals(path)) {
-      return service.getCard(params.get("number"));
-    } else if ("api/card/balance".equals(path)) {
-      return service.getCardBalance(params.get("number"));
-    }
 
+    switch (path) {
+      case "api/card":
+        return service.getCard(params.get("number"));
+      case "api/card/balance":
+        return service.getCardBalance(params.get("number"));
+    }
     throw new IllegalArgumentException();
   }
 

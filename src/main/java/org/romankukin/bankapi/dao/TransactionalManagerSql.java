@@ -17,7 +17,7 @@ public class TransactionalManagerSql implements TransactionalManager {
   private static final String TRANSACTION_START = "Transaction started";
   private static final String TRANSACTION_FINISH = "Transaction finished successful";
   private static final String TRANSACTION_ROLLBACK = "Transaction: rollback to save point";
-  private static final String WARN_TRANSACTION = "Warning: Transaction ";
+  private static final String TRANSACTION_ERROR = "Transaction failed";
   private static final String CONNECTION_NULL = "Connection is null";
 
   public TransactionalManagerSql(DataSource dataSource) {
@@ -25,7 +25,7 @@ public class TransactionalManagerSql implements TransactionalManager {
   }
 
   @Override
-  public <T> T doTransaction(SupplierDao<T> action) throws SQLException {
+  public <T> T doTransaction(SupplierDao<T> action) throws TransactionFailedException {
     Connection connection = null;
     Savepoint savepoint = null;
     try {
@@ -38,14 +38,19 @@ public class TransactionalManagerSql implements TransactionalManager {
       logger.debug(TRANSACTION_FINISH);
       return res;
     } catch (SQLException e) {
-      logger.error(WARN_TRANSACTION + e.getMessage());
+      logger.error(TRANSACTION_ERROR + e.getMessage());
       if (connection != null) {
-        connection.rollback(savepoint);
+        try {
+          connection.rollback(savepoint);
+        } catch (SQLException ex) {
+          logger.error(TRANSACTION_ERROR + e.getMessage());
+          throw new TransactionFailedException();
+        }
         logger.error(TRANSACTION_ROLLBACK);
       } else {
         logger.error(CONNECTION_NULL);
       }
-      throw new TransactionFailedException(e);
+      throw new TransactionFailedException();
     }
   }
 }
