@@ -15,7 +15,7 @@ import org.h2.tools.RunScript;
 import org.romankukin.bankapi.context.AppContext;
 import org.romankukin.bankapi.controller.CardHandler;
 import org.romankukin.bankapi.controller.HelloHandler;
-import org.romankukin.bankapi.service.CardService;
+import org.romankukin.bankapi.service.CardServiceImpl;
 
 public class ClientAPI {
 
@@ -28,7 +28,7 @@ public class ClientAPI {
   private void mapHandlers() {
     server.createContext("/api/hello", new HelloHandler());
     server.createContext("/api/card",
-        new CardHandler((CardService) appContext.getBean("cardService")));
+        new CardHandler((CardServiceImpl) appContext.getBean("cardService")));
   }
 
   private String SCRIPT_PATH = "/Users/a19188182/development/bank-api/src/main/resources/script/create_table.sql";

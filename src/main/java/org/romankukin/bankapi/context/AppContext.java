@@ -3,9 +3,9 @@ package org.romankukin.bankapi.context;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
-import org.romankukin.bankapi.dao.CardDao;
+import org.romankukin.bankapi.dao.CardDaoImpl;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
-import org.romankukin.bankapi.service.CardService;
+import org.romankukin.bankapi.service.CardServiceImpl;
 
 public class AppContext {
 
@@ -17,8 +17,8 @@ public class AppContext {
 
   public AppContext() {
     beans.put(DATA_SOURCE, new FileDatabaseConnection().createDataSource());
-    beans.put(CARD_DAO, new CardDao((DataSource) beans.get(DATA_SOURCE)));
-    beans.put(CARD_SERVICE, new CardService((CardDao) beans.get(CARD_DAO)));
+    beans.put(CARD_DAO, new CardDaoImpl((DataSource) beans.get(DATA_SOURCE)));
+    beans.put(CARD_SERVICE, new CardServiceImpl((CardDaoImpl) beans.get(CARD_DAO)));
   }
 
   public Object getBean(String beanName) {

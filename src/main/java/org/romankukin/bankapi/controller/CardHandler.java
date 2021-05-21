@@ -1,6 +1,5 @@
 package org.romankukin.bankapi.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
@@ -12,18 +11,18 @@ import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardUpdateRequest;
 import org.romankukin.bankapi.model.CardStatus;
-import org.romankukin.bankapi.service.CardService;
+import org.romankukin.bankapi.service.CardServiceImpl;
 
 //1) Выпуск новой карты по счету
 //2) Проcмотр списка карт
 //3) Внесение вредств
 //4) Проверка баланса
-public class CardHandler implements HttpHandler, BankHandler {
+public class CardHandler extends BankHandler implements HttpHandler {
 
   private final static Integer CARD_NUMBER_LENGTH = 16;
-  private final CardService service;
+  private final CardServiceImpl service;
 
-  public CardHandler(CardService service) {
+  public CardHandler(CardServiceImpl service) {
     this.service = service;
   }
 
@@ -44,35 +43,6 @@ public class CardHandler implements HttpHandler, BankHandler {
     outputStream.write(errorMessage.getBytes(StandardCharsets.UTF_8));
     outputStream.flush();
     outputStream.close();
-  }
-
-  private String extractAllAfterLastSlash(String path) {
-    return path.substring(path.lastIndexOf("/") + 1);
-  }
-
-//  protected static String extractBody(HttpExchange exchange) throws IOException {
-//    InputStreamReader isr =  new InputStreamReader(exchange.getRequestBody(),"utf-8");
-//    BufferedReader br = new BufferedReader(isr);
-//
-//    String response = null;
-//    if ((response = br.readLine()) != null) {
-//      return response;
-//    }
-//    throw new NoRequestBodyDetectedException();
-//  }
-
-  private CardStatusUpdateRequest extractCardStatusFromJson(HttpExchange httpExchange)
-      throws IOException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper
-        .readValue(httpExchange.getRequestBody(), CardStatusUpdateRequest.class);
-  }
-
-  private <T> T extractObjectFromJson(HttpExchange httpExchange, Class<T> classObject)
-      throws IOException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper
-        .readValue(httpExchange.getRequestBody(), classObject);
   }
 
   private CardStatusUpdateRequest createCardUpdateStatus(HttpExchange exchange, CardStatus status)
