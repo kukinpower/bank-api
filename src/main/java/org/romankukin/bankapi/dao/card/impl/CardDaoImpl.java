@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.dao;
+package org.romankukin.bankapi.dao.card.impl;
 
 import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
 import java.math.BigDecimal;
@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
+import org.romankukin.bankapi.dao.card.CardDao;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;

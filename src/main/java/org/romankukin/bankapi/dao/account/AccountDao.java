@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.dao;
+package org.romankukin.bankapi.dao.account;
 
 import java.sql.SQLException;
 import java.util.List;

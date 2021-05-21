@@ -1,8 +1,9 @@
-package org.romankukin.bankapi.dao;
+package org.romankukin.bankapi.dao.account.impl;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import org.romankukin.bankapi.dao.account.AccountDao;
 
 public class AccountDaoImpl implements AccountDao {
 

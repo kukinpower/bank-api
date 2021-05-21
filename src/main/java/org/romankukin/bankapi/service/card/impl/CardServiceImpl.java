@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.service;
+package org.romankukin.bankapi.service.card.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
-import org.romankukin.bankapi.dao.CardDaoImpl;
+import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
@@ -26,6 +26,7 @@ import org.romankukin.bankapi.exception.SqlExceptionToMessageConverter;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
+import org.romankukin.bankapi.service.card.CardService;
 
 public class CardServiceImpl implements CardService {
 

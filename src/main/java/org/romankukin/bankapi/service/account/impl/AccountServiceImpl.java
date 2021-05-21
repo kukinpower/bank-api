@@ -1,6 +1,7 @@
-package org.romankukin.bankapi.service;
+package org.romankukin.bankapi.service.account.impl;
 
 import java.sql.SQLException;
+import org.romankukin.bankapi.service.account.AccountService;
 
 public class AccountServiceImpl implements AccountService { //todo account
   public void createNewAccount() throws SQLException {

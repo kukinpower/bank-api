@@ -15,7 +15,7 @@ import org.h2.tools.RunScript;
 import org.romankukin.bankapi.context.AppContext;
 import org.romankukin.bankapi.controller.CardHandler;
 import org.romankukin.bankapi.controller.HelloHandler;
-import org.romankukin.bankapi.service.CardServiceImpl;
+import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 
 public class ClientAPI {
 

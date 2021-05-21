@@ -3,9 +3,9 @@ package org.romankukin.bankapi.context;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
-import org.romankukin.bankapi.dao.CardDaoImpl;
+import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
-import org.romankukin.bankapi.service.CardServiceImpl;
+import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 
 public class AppContext {
 

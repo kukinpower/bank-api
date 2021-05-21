@@ -11,7 +11,7 @@ import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardUpdateRequest;
 import org.romankukin.bankapi.model.CardStatus;
-import org.romankukin.bankapi.service.CardServiceImpl;
+import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 
 //1) Выпуск новой карты по счету
 //2) Проcмотр списка карт
