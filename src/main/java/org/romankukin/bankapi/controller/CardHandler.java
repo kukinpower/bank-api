@@ -85,9 +85,9 @@ public class CardHandler extends BankHandler implements HttpHandler {
     //all needing params
     Map<String, String> params = getParametersFromQuery(exchange);
     if ("api/card".equals(path)) {
-      return service.getCard(exchange, params.get("number"));
+      return service.getCard(params.get("number"));
     } else if ("api/card/balance".equals(path)) {
-      return service.getCardBalance(exchange, params.get("number"));
+      return service.getCardBalance(params.get("number"));
     }
 
     throw new IllegalArgumentException();

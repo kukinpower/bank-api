@@ -101,9 +101,10 @@ public class CardServiceImpl implements CardService {
     return stringBuilder.toString();
   }
 
+  // TODO: 21.05.2021 fix
   public String createNewCard(HttpExchange exchange, JsonNode objectFromJson)
       throws IOException, SQLException {
-    String accountNumber = extractFieldFromRequestBody(exchange, objectFromJson,"number");
+    String accountNumber = extractFieldFromRequestBody(exchange, objectFromJson, "number");
     String currencyStringIndex = extractFieldFromRequestBody(exchange, objectFromJson, "currency");
     Currency currency = Currency.RUB;
     try {
@@ -111,18 +112,15 @@ public class CardServiceImpl implements CardService {
     } catch (IndexOutOfBoundsException | NullPointerException e) {
       e.printStackTrace();
     }
-    return createNewCard(exchange,
-        new Card(generateCardNumber(), generateCardPin(), accountNumber, currency,
+    return createNewCard(new Card(generateCardNumber(), generateCardPin(), accountNumber, currency,
             BigDecimal.ZERO, CardStatus.PENDING));
   }
 
-  public String createNewCard(HttpExchange exchange, Card card)
-      throws JsonProcessingException, SQLException {
+  public String createNewCard(Card card) throws JsonProcessingException {
 
     try {
-      if (dao.create(card)) {
-        ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
-        return objectWriter.writeValueAsString(card);
+      if (transactionalManager.doTransaction((connection) -> dao.create(connection, card))) {
+        return cardToJson(card);
       }
     } catch (SQLException e) {
       Optional<Card> entity = dao.getEntity(card.getNumber());
@@ -138,27 +136,20 @@ public class CardServiceImpl implements CardService {
     throw new ObjectNotCreatedException(card.toString());
   }
 
-  public String getCard(HttpExchange exchange, String cardNumber)
-      throws SQLException, JsonProcessingException {
+  public String getCard(String cardNumber) throws JsonProcessingException {
     Optional<Card> entity = dao.getEntity(cardNumber);
-    if (entity.isPresent()) {
-      ObjectMapper mapper = new ObjectMapper();
-
-      SimpleModule module = new SimpleModule();
-      module.addSerializer(Card.class, new CardSerializer());
-      mapper.registerModule(module);
-
-      return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(entity.get());
-    } else {
-      return "kek";
+    if (!entity.isPresent()) {
+      throw new NoSuchEntityException("table is empty");
     }
+    return cardToJson(entity.get());
   }
 
   public String updateCardStatus(HttpExchange exchange, CardStatusUpdateRequest cardStatusUpdate)
       throws SQLException, JsonProcessingException {
     Optional<Card> entity = dao.getEntity(cardStatusUpdate.getNumber());
     if (entity.isPresent()) {
-      Card card = dao.updateCardStatus(cardStatusUpdate);
+      Card card = transactionalManager
+          .doTransaction((connection) -> dao.updateCardStatus(connection, cardStatusUpdate));
 
       return cardToJson(card);
 
@@ -167,7 +158,7 @@ public class CardServiceImpl implements CardService {
     }
   }
 
-  public String getCardBalance(HttpExchange exchange, String cardNumber) throws SQLException {
+  public String getCardBalance(String cardNumber) {
     Optional<Card> entity = dao.getEntity(cardNumber);
     if (entity.isPresent()) {
       return entity.get().getBalance().toPlainString();
@@ -176,8 +167,12 @@ public class CardServiceImpl implements CardService {
     }
   }
 
-  public String getAllCards() throws SQLException, JsonProcessingException {
-    return cardToJson(dao.getAllEntities());
+  public String getAllCards() throws JsonProcessingException {
+    List<Card> cards = dao.getAllEntities();
+    if (cards.isEmpty()) {
+      throw new NoSuchEntityException("table is empty");
+    }
+    return cardToJson(cards);
   }
 
   private String cardToJson(Card card) throws JsonProcessingException {
@@ -197,9 +192,9 @@ public class CardServiceImpl implements CardService {
         throw new CardClosedException("Card " + cardBalanceUpdate.getNumber() + " is closed");
       }
       card.setBalance(card.getBalance().add(cardBalanceUpdate.getAmount()));
-      Card card1 = transactionalManager.doTransaction((connection) -> dao.update(connection, card));
-      return cardToJson(card1);
-//      return cardToJson(dao.update(card));
+      Card cardFromDatabase = transactionalManager
+          .doTransaction((connection) -> dao.update(connection, card));
+      return cardToJson(cardFromDatabase);
     } else {
       throw new NoSuchEntityException("no card with number: " + cardBalanceUpdate.getNumber());
     }

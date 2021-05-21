@@ -23,32 +23,7 @@ public class TransactionalManagerSql implements TransactionalManager {
   public TransactionalManagerSql(DataSource dataSource) {
     this.dataSource = dataSource;
   }
-//
-//  @Override
-//  public <T> T doTransaction(SupplierDao<T> action) throws SQLException {
-//    Connection connection = null;
-//    Savepoint savepoint = null;
-//    try {
-//      connection = dataSource.getConnection();
-//      connection.setAutoCommit(false);
-//      savepoint = connection.setSavepoint(SAVEPOINT_TRANSACTION_START);
-//      logger.info(TRANSACTION_START);
-//      T res = action.get(connection);
-//      connection.commit();
-//      logger.info(TRANSACTION_FINISH);
-//      return res;
-//    } catch (SQLException e) {
-//      logger.warning(WARN_TRANSACTION + e.getMessage());
-//      if (connection != null) {
-//        connection.rollback(savepoint);
-//        logger.info(TRANSACTION_ROLLBACK);
-//      } else {
-//        logger.warning(CONNECTION_NULL);
-//      }
-//      throw new TransactionFailedException(e);
-//    }
-//  }
-//
+
   @Override
   public <T> T doTransaction(SupplierDao<T> action) throws SQLException {
     Connection connection = null;
@@ -62,30 +37,6 @@ public class TransactionalManagerSql implements TransactionalManager {
       connection.commit();
       logger.debug(TRANSACTION_FINISH);
       return res;
-    } catch (SQLException e) {
-      logger.error(WARN_TRANSACTION + e.getMessage());
-      if (connection != null) {
-        connection.rollback(savepoint);
-        logger.error(TRANSACTION_ROLLBACK);
-      } else {
-        logger.error(CONNECTION_NULL);
-      }
-      throw new TransactionFailedException(e);
-    }
-  }
-
-  @Override
-  public void doTransaction(Runnable action) throws SQLException {
-    Connection connection = null;
-    Savepoint savepoint = null;
-    try {
-      connection = dataSource.getConnection();
-      connection.setAutoCommit(false);
-      savepoint = connection.setSavepoint(SAVEPOINT_TRANSACTION_START);
-      logger.debug(TRANSACTION_START);
-      action.run();
-      connection.commit();
-      logger.debug(TRANSACTION_FINISH);
     } catch (SQLException e) {
       logger.error(WARN_TRANSACTION + e.getMessage());
       if (connection != null) {
