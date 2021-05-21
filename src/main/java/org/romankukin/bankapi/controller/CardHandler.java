@@ -8,9 +8,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Map;
-import org.romankukin.bankapi.controller.scheme.CardBalanceUpdateRequest;
-import org.romankukin.bankapi.controller.scheme.CardStatusUpdateRequest;
-import org.romankukin.bankapi.controller.scheme.CardUpdateRequest;
+import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
+import org.romankukin.bankapi.controller.dto.CardUpdateRequest;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.service.CardService;
 

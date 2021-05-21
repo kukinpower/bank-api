@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
-import org.romankukin.bankapi.controller.scheme.CardStatusUpdateRequest;
+import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;

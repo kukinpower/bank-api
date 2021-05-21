@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.controller.scheme;
+package org.romankukin.bankapi.controller.dto;
 
 import java.math.BigDecimal;
 
