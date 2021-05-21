@@ -112,9 +112,9 @@ public class CardDaoImpl implements CardDao<Card, String> {
   }
 
   @Override
-  public Card update(Card card) throws SQLException {
-    try (Connection connection = dataSource.getConnection()) {
-      connection.setAutoCommit(false);
+  public Card update(Card card) {
+//    try (Connection connection = dataSource.getConnection()) {
+//      connection.setAutoCommit(false);
       try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD)) {
         preparedStatement.setBigDecimal(1, card.getBalance());
 
@@ -125,7 +125,7 @@ public class CardDaoImpl implements CardDao<Card, String> {
         preparedStatement.setString(3, card.getNumber());
         preparedStatement.executeUpdate();
 
-        connection.commit();
+//        connection.commit();
 
         return card;
       }

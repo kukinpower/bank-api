@@ -6,6 +6,7 @@ import java.sql.Savepoint;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+import org.romankukin.bankapi.dao.card.SupplierThrows;
 import org.romankukin.bankapi.exception.TransactionFailedException;
 
 public class TransactionalManagerSql implements TransactionalManager {
@@ -24,7 +25,7 @@ public class TransactionalManagerSql implements TransactionalManager {
   }
 
   @Override
-  public <T> T doTransaction(Supplier<T> action) throws SQLException {
+  public <T> T doTransaction(SupplierThrows<T> action) throws SQLException {
     Connection connection = null;
     Savepoint savepoint = null;
     try {
@@ -32,7 +33,7 @@ public class TransactionalManagerSql implements TransactionalManager {
       connection.setAutoCommit(false);
       savepoint = connection.setSavepoint(SAVEPOINT_TRANSACTION_START);
       logger.info(TRANSACTION_START);
-      T res = action.get();
+      T res = action.get(connection);
       connection.commit();
       logger.info(TRANSACTION_FINISH);
       return res;

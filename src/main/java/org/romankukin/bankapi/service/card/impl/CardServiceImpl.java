@@ -18,6 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
+import org.romankukin.bankapi.dao.TransactionalManager;
+import org.romankukin.bankapi.dao.TransactionalManagerSql;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
@@ -32,13 +34,15 @@ public class CardServiceImpl implements CardService {
 
   private final CardDaoImpl dao;
   private final ObjectMapper mapper;
+  private TransactionalManager transactionalManager;
   public static final String BIN = "400000";
   public static int CARD_LENGTH = 16;
   public static int ACCOUNT_LENGTH = 20;
 
-  public CardServiceImpl(CardDaoImpl dao) {
+  public CardServiceImpl(CardDaoImpl dao, TransactionalManager transactionalManager) {
     this.dao = dao;
     this.mapper = createCardObjectMapper();
+    this.transactionalManager = transactionalManager;
   }
 
   private static ObjectMapper createCardObjectMapper() {
@@ -134,10 +138,6 @@ public class CardServiceImpl implements CardService {
     throw new ObjectNotCreatedException(card.toString());
   }
 
-  public String listAllCards(HttpExchange exchange) {
-    return "card1, card2";
-  }
-
   public String getCard(HttpExchange exchange, String cardNumber)
       throws SQLException, JsonProcessingException {
     Optional<Card> entity = dao.getEntity(cardNumber);
@@ -197,7 +197,8 @@ public class CardServiceImpl implements CardService {
         throw new CardClosedException("Card " + cardBalanceUpdate.getNumber() + " is closed");
       }
       card.setBalance(card.getBalance().add(cardBalanceUpdate.getAmount()));
-      return cardToJson(dao.update(card));
+      return cardToJson(transactionalManager.doTransaction(() -> dao.update(card)));
+//      return cardToJson(dao.update(card));
     } else {
       throw new NoSuchEntityException("no card with number: " + cardBalanceUpdate.getNumber());
     }
