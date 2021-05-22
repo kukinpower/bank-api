@@ -1,10 +1,8 @@
 package org.romankukin.bankapi.dao.card.impl;
 
-import org.romankukin.bankapi.controller.dto.AccountNumberRequest;
-import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
+import org.romankukin.bankapi.controller.dto.CardNumberDeleteRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,24 +26,13 @@ public class CardDaoImpl implements CardDao, Dao {
 
   private static final Logger logger = LoggerFactory.getLogger(CardDaoImpl.class);
 
-  private final static String CREATE_TABLE = "create table IF NOT EXISTS card"
-      + " (id INTEGER auto_increment primary key,"
-      + " number varchar(255) NOT NULL,"
-      + " pin varchar(4) NOT NULL,"
-      + " balance INTEGER DEFAULT 0,"
-      + "unique (number))";
   private final static String CREATE_CARD = "insert into card values(?, ?, ?, ?, ?, ?)";
   private final static String GET_ALL_FROM_CARD = "select * from card";
   private final static String FIND_CARD = "select * from card where number = '%s'";
-  private final static String FIND_CARD_BY_NUMBER = "select * from card"
-      + " where number = '%s'";
   private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
-  private static final String DELETE_CARD = "delete from card" +
-      " where number = ? and pin = ?";
-
+  private static final String DELETE_CARD = "delete from card where number = ?";
   private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ?";
   private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ?";
-  private static final String UPDATE_CARD_FIELD = "update card set %s = ? where number = ?";
   private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ? where number = ?";
 
   private DataSource dataSource;
@@ -176,8 +163,14 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public Optional<Card> deleteCard(Connection connection, Card card) {
-
-    return Optional.of(card);
+  public CardNumberDeleteRequest deleteCard(Connection connection, CardNumberDeleteRequest cardNumberDeleteRequest) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CARD)) {
+      preparedStatement.setString(1, cardNumberDeleteRequest.getNumber());
+      preparedStatement.executeUpdate();
+      return cardNumberDeleteRequest;
+    } catch (SQLException e) {
+      logger.error(e.getMessage());
+      throw new DatabaseQueryException();
+    }
   }
 }

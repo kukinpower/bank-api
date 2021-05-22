@@ -4,14 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.controller.dto.AccountNumberRequest;
 import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.controller.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
@@ -21,16 +19,15 @@ import org.romankukin.bankapi.exception.TransactionFailedException;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
+import org.romankukin.bankapi.service.BankService;
+import org.romankukin.bankapi.service.Service;
 import org.romankukin.bankapi.service.card.CardService;
 
-public class CardServiceImpl implements CardService {
+public class CardServiceImpl implements Service, CardService, BankService {
 
   private final CardDaoImpl dao;
   private final ObjectMapper mapper;
   private final TransactionalManager transactionalManager;
-  public static final String BIN = "400000";
-  public static int CARD_LENGTH = 16;
-  public static int ACCOUNT_LENGTH = 20;
 
   public CardServiceImpl(CardDaoImpl dao, TransactionalManager transactionalManager) {
     this.dao = dao;
@@ -44,54 +41,6 @@ public class CardServiceImpl implements CardService {
     module.addSerializer(Card.class, new CardSerializer());
     mapper.registerModule(module);
     return mapper;
-  }
-
-  public static String generateRandomIntSequenceStringOfLength(int length) {
-    StringBuilder stringBuilder = new StringBuilder();
-
-    ThreadLocalRandom random = ThreadLocalRandom.current();
-    for (int i = 0; i < length; i++) {
-      stringBuilder.append(random.nextInt(10));
-    }
-    return stringBuilder.toString();
-  }
-
-  private static int getCardSumByLuhn(String digits) {
-    int[] arr = new int[digits.length()];
-    for (int i = 0; i < digits.length(); i++) {
-      int digit = digits.charAt(i) - '0';
-      if (i % 2 == 0) {
-        arr[i] = digit * 2 > 9 ? digit * 2 - 9 : digit * 2;
-      } else {
-        arr[i] = digit;
-      }
-    }
-
-    return Arrays.stream(arr).sum();
-  }
-
-  private static boolean isValidCardNumberLuhnlgorithm(String number) {
-    int sum = getCardSumByLuhn(number.substring(0, number.length() - 1));
-    int checksum = Integer.parseInt(number.substring(number.length() - 1));
-    return (sum + checksum) % 10 == 0;
-  }
-
-  private static String generateCardNumber() {
-    String digits = BIN + generateRandomIntSequenceStringOfLength(9);
-    int sum = getCardSumByLuhn(digits);
-    int checksum = sum % 10 == 0 ? 0 : 10 - (sum % 10);
-    return digits + checksum;
-  }
-
-  private static String generateCardPin() {
-    return generateRandomIntSequenceStringOfLength(4);
-  }
-
-  private String cardFieldsToString(Map<String, Object> fields) {
-    StringBuilder stringBuilder = new StringBuilder();
-    fields.forEach((key, value) -> stringBuilder.append(key).append(":").append(value)
-        .append(System.lineSeparator()));
-    return stringBuilder.toString();
   }
 
   private Card createCardByAccountNumber(AccountNumberRequest accountNumberRequest) {
@@ -152,10 +101,17 @@ public class CardServiceImpl implements CardService {
     return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
   }
 
-  public String deposit(CardBalanceUpdateRequest cardBalanceUpdate)
+  public String depositCard(CardBalanceUpdateRequest cardBalanceUpdate)
       throws JsonProcessingException, TransactionFailedException {
     CardBalanceUpdateRequest cardBalanceUpdateRequest = transactionalManager
         .doTransaction((connection) -> dao.updateCardBalance(connection, cardBalanceUpdate));
     return dtoToJson(cardBalanceUpdateRequest);
+  }
+
+  public String deleteCard(CardNumberDeleteRequest cardNumberDeleteRequest)
+      throws JsonProcessingException, TransactionFailedException {
+    CardNumberDeleteRequest cardNumberDelete = transactionalManager
+        .doTransaction((connection) -> dao.deleteCard(connection, cardNumberDeleteRequest));
+    return dtoToJson(cardNumberDelete);
   }
 }
