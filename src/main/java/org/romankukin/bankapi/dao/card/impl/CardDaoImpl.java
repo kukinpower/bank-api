@@ -34,7 +34,7 @@ public class CardDaoImpl implements CardDao, Dao {
   private final static String GET_CARD_STATUS = "select status from card where number = '%s'";
   private static final String DELETE_CARD = "delete from card where number = ?";
   private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ? and status != 3";
-  private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ?";
+  private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ? and status != 3";
   private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ? where number = ? and status != 3";
 
   private static final String NO_SUCH_CARD = "No card with this number in database. Or it is already closed.";
@@ -139,7 +139,9 @@ public class CardDaoImpl implements CardDao, Dao {
     try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_STATUS)) {
       preparedStatement.setInt(1, cardStatusUpdateRequest.getStatus());
       preparedStatement.setString(2, cardStatusUpdateRequest.getNumber());
-      preparedStatement.executeUpdate();
+      if (preparedStatement.executeUpdate() == 0) {
+        throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
+      }
       return cardStatusUpdateRequest;
     } catch (SQLException e) {
       logger.error(e.getMessage());
