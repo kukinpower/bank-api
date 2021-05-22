@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.controller.dto;
+package org.romankukin.bankapi.dto;
 
 import org.romankukin.bankapi.model.CardStatus;
 

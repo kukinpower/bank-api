@@ -3,9 +3,9 @@ package org.romankukin.bankapi.dao.card;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
-import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
-import org.romankukin.bankapi.controller.dto.CardNumberDeleteRequest;
-import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
+import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
+import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.Card;
 
