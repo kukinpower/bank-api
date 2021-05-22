@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Map;
+import org.romankukin.bankapi.controller.dto.AccountNumberRequest;
 import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardUpdateRequest;
@@ -56,7 +57,7 @@ public class CardHandler extends BankHandler implements HttpHandler {
 
     switch (path) {
       case "api/card":
-        return service.createNewCard(extractObjectFromJson(ex, CardBalanceUpdateRequest.class));
+        return service.addNewCardToDatabase(extractObjectFromJson(ex, AccountNumberRequest.class));
       case "api/card/activate":
         return service.updateCardStatus(createCardUpdateStatus(ex, CardStatus.ACTIVE));
       case "api/card/close":

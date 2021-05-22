@@ -1,8 +1,10 @@
 package org.romankukin.bankapi.dao.card.impl;
 
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
-import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
+import org.romankukin.bankapi.controller.dto.AccountNumberRequest;
+import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+//import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -32,7 +34,7 @@ public class CardDaoImpl implements CardDao, Dao {
       + " pin varchar(4) NOT NULL,"
       + " balance INTEGER DEFAULT 0,"
       + "unique (number))";
-  private final static String INSERT_CARD = "insert into card values(?, ?, ?, ?, ?, ?)";
+  private final static String CREATE_CARD = "insert into card values(?, ?, ?, ?, ?, ?)";
   private final static String GET_ALL_FROM_CARD = "select * from card";
   private final static String FIND_CARD = "select * from card where number = '%s'";
   private final static String FIND_CARD_BY_NUMBER = "select * from card"
@@ -131,13 +133,7 @@ public class CardDaoImpl implements CardDao, Dao {
       preparedStatement.setBigDecimal(1, cardBalanceUpdateRequest.getAmount());
       preparedStatement.setString(2, cardBalanceUpdateRequest.getNumber());
       preparedStatement.executeUpdate();
-
-      Optional<Card> entity = getCard(cardBalanceUpdateRequest.getNumber());
-      if (entity.isPresent()) {
-        return entity.get();
-      }
-      throw new NoSuchEntityException(
-          "no such entity with number: " + cardBalanceUpdateRequest.getNumber());
+      return cardBalanceUpdateRequest;
     } catch (SQLException e) {
       logger.error(e.getMessage());
       throw new DatabaseQueryException();
@@ -145,7 +141,7 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public Card updateCard(Connection connection, Card card) {
+  public Optional<Card> updateCard(Connection connection, Card card) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD)) {
       preparedStatement.setBigDecimal(1, card.getBalance());
 
@@ -156,16 +152,15 @@ public class CardDaoImpl implements CardDao, Dao {
       preparedStatement.setString(3, card.getNumber());
       preparedStatement.executeUpdate();
 
-      return card;
+      return Optional.of(card);
     } catch (SQLException e) {
       logger.error(e.getMessage());
       throw new DatabaseQueryException();
     }
   }
-
   @Override
-  public boolean createCard(Connection connection, Card card) {
-    try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_CARD)) {
+  public Optional<Card> createCard(Connection connection, Card card) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_CARD)) {
       preparedStatement.setString(1, card.getNumber());
       preparedStatement.setString(2, card.getPin());
       preparedStatement.setString(3, card.getAccount());
@@ -173,7 +168,7 @@ public class CardDaoImpl implements CardDao, Dao {
       preparedStatement.setBigDecimal(5, card.getBalance());
       preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
       preparedStatement.executeUpdate();
-      return true;
+      return Optional.of(card);
     } catch (SQLException e) {
       logger.error(e.getMessage());
       throw new DatabaseQueryException();
@@ -181,7 +176,8 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public boolean deleteCard(Connection connection, Card card) {
-    return false;
+  public Optional<Card> deleteCard(Connection connection, Card card) {
+
+    return Optional.of(card);
   }
 }

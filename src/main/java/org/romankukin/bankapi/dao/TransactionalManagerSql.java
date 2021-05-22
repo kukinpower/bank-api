@@ -1,7 +1,7 @@
 package org.romankukin.bankapi.dao;
 
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -17,7 +17,7 @@ public class TransactionalManagerSql implements TransactionalManager {
   private static final String TRANSACTION_START = "Transaction started";
   private static final String TRANSACTION_FINISH = "Transaction finished successful";
   private static final String TRANSACTION_ROLLBACK = "Transaction: rollback to save point";
-  private static final String TRANSACTION_ERROR = "Transaction failed";
+  private static final String TRANSACTION_ERROR = "Transaction failed {}";
   private static final String CONNECTION_NULL = "Connection is null";
 
   public TransactionalManagerSql(DataSource dataSource) {
@@ -38,12 +38,12 @@ public class TransactionalManagerSql implements TransactionalManager {
       logger.debug(TRANSACTION_FINISH);
       return res;
     } catch (SQLException e) {
-      logger.error(TRANSACTION_ERROR + e.getMessage());
+      logger.error(TRANSACTION_ERROR, e.getMessage());
       if (connection != null) {
         try {
           connection.rollback(savepoint);
         } catch (SQLException ex) {
-          logger.error(TRANSACTION_ERROR + e.getMessage());
+          logger.error(TRANSACTION_ERROR, e.getMessage());
           throw new TransactionFailedException();
         }
         logger.error(TRANSACTION_ROLLBACK);

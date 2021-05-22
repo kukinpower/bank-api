@@ -1,8 +1,8 @@
 package org.romankukin.bankapi;
 
 import com.sun.net.httpserver.HttpServer;
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class ClientAPI {
         new CardHandler((CardServiceImpl) appContext.getBean("cardService")));
   }
 
-  private String SCRIPT_PATH = "/Users/a19188182/development/bank-api/src/main/resources/script/create_table.sql";
+  private String SCRIPT_PATH = "/Users/romankukin/development/bank-api/src/main/resources/script/create_table.sql";
 
   private void initDatabase() throws FileNotFoundException, SQLException {
     try (Connection connection = ((DataSource) appContext.getBean("dataSource")).getConnection()) {
@@ -48,7 +48,8 @@ public class ClientAPI {
     mapHandlers();
     server.setExecutor(threadPoolExecutor);
     server.start();
-    logger.debug("Server started on port " + PORT);
+    System.out.println(Thread.currentThread().getName());
+    logger.debug("Server started on port {}", PORT);
   }
 
   public static void main(String[] args) throws IOException, SQLException {

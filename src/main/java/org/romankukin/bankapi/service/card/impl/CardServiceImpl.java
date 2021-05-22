@@ -1,28 +1,23 @@
 package org.romankukin.bankapi.service.card.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.tools.internal.ws.wsdl.framework.NoSuchEntityException;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import org.romankukin.bankapi.CardSerializer;
+import org.romankukin.bankapi.controller.dto.AccountNumberRequest;
 import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
-import org.romankukin.bankapi.exception.CardClosedException;
-import org.romankukin.bankapi.exception.ObjectAlreadyExistsInDatabaseException;
+import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
-import org.romankukin.bankapi.exception.SqlExceptionToMessageConverter;
+import org.romankukin.bankapi.exception.TransactionFailedException;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
@@ -32,7 +27,7 @@ public class CardServiceImpl implements CardService {
 
   private final CardDaoImpl dao;
   private final ObjectMapper mapper;
-  private TransactionalManager transactionalManager;
+  private final TransactionalManager transactionalManager;
   public static final String BIN = "400000";
   public static int CARD_LENGTH = 16;
   public static int ACCOUNT_LENGTH = 20;
@@ -99,71 +94,52 @@ public class CardServiceImpl implements CardService {
     return stringBuilder.toString();
   }
 
-  // TODO: 21.05.2021 fix
-  public String createNewCard(HttpExchange exchange, JsonNode objectFromJson)
-      throws IOException, SQLException {
-    String accountNumber = extractFieldFromRequestBody(exchange, objectFromJson, "number");
-    String currencyStringIndex = extractFieldFromRequestBody(exchange, objectFromJson, "currency");
-    Currency currency = Currency.RUB;
-    try {
-      currency = Currency.values()[Integer.parseInt(currencyStringIndex) - 1];
-    } catch (IndexOutOfBoundsException | NullPointerException e) {
-      e.printStackTrace();
-    }
-    return createNewCard(new Card(generateCardNumber(), generateCardPin(), accountNumber, currency,
-            BigDecimal.ZERO, CardStatus.PENDING));
+  private Card createCardByAccountNumber(AccountNumberRequest accountNumberRequest) {
+    return new Card(generateCardNumber(), generateCardPin(), accountNumberRequest.getAccount(),
+        Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING);
   }
 
-  public String createNewCard(CardBalanceUpdateRequest cardBalanceRequest) throws JsonProcessingException {
+  public String addNewCardToDatabase(AccountNumberRequest accountNumberRequest)
+      throws JsonProcessingException {
+    return addNewCardToDatabase(createCardByAccountNumber(accountNumberRequest));
+  }
 
+  public String addNewCardToDatabase(Card card) throws JsonProcessingException {
     try {
-      transactionalManager.doTransaction((connection) -> dao.createCard(connection, card))
-      if () {
-        return cardToJson(card);
-      }
-    } catch (SQLException e) {
-      Optional<Card> entity = dao.getCard(card.getNumber());
+      Optional<Card> entity = transactionalManager.doTransaction((connection) -> dao.createCard(connection, card));
       if (entity.isPresent()) {
-        throw new ObjectAlreadyExistsInDatabaseException(card.toString(),
-            new SqlExceptionToMessageConverter().extractStackTraceFromSqlException(e),
-            e);
+        return dtoToJson(card);
       }
-      throw new ObjectNotCreatedException(card.toString(),
-          new SqlExceptionToMessageConverter().extractStackTraceFromSqlException(e),
-          e);
+    } catch (TransactionFailedException e) {
+      throw new ObjectNotCreatedException(card.toString(), e);
     }
     throw new ObjectNotCreatedException(card.toString());
   }
 
-  public String getCard(String cardNumber) throws JsonProcessingException {
+  public String getCard(String cardNumber)
+      throws JsonProcessingException, NoSuchEntityInDatabaseException {
     Optional<Card> entity = dao.getCard(cardNumber);
     if (!entity.isPresent()) {
-      throw new NoSuchEntityException("table is empty");
+      throw new NoSuchEntityInDatabaseException("table is empty");
     }
     return dtoToJson(entity.get());
   }
 
   public String updateCardStatus(CardStatusUpdateRequest cardStatusUpdate)
-      throws SQLException, JsonProcessingException {
-    Optional<Card> entity = dao.getCard(cardStatusUpdate.getNumber());
-    if (entity.isPresent()) {
-      CardStatusUpdateRequest dto = transactionalManager.doTransaction((connection) -> dao.updateCardStatus(connection, cardStatusUpdate));
-
-      return dtoToJson(dto);
-
-    } else {
-      throw new NoSuchEntityException("no card with number: " + cardStatusUpdate.getNumber());
-    }
+      throws TransactionFailedException, JsonProcessingException {
+    CardStatusUpdateRequest cardStatusUpdateRequest = transactionalManager
+        .doTransaction((connection) -> dao.updateCardStatus(connection, cardStatusUpdate));
+    return dtoToJson(cardStatusUpdateRequest);
   }
 
   public String getCardBalance(String cardNumber) {
     return dao.getCardBalance(cardNumber).toPlainString();
   }
 
-  public String getAllCards() throws JsonProcessingException {
+  public String getAllCards() throws JsonProcessingException, NoSuchEntityInDatabaseException {
     List<Card> cards = dao.getAllEntities();
     if (cards.isEmpty()) {
-      throw new NoSuchEntityException("table is empty");
+      throw new NoSuchEntityInDatabaseException("table is empty");
     }
     return dtoToJson(cards);
   }
@@ -176,18 +152,10 @@ public class CardServiceImpl implements CardService {
     return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
   }
 
-  public String deposit(CardBalanceUpdateRequest cardBalanceUpdate) throws SQLException, JsonProcessingException {
-    Optional<Card> entity = dao.getCard(cardBalanceUpdate.getNumber());
-    if (entity.isPresent()) {
-      Card card = entity.get();
-      if (card.getStatus() == CardStatus.CLOSED) {
-        throw new CardClosedException("Card " + cardBalanceUpdate.getNumber() + " is closed");
-      }
-      card.setBalance(card.getBalance().add(cardBalanceUpdate.getAmount()));
-      Card cardFromDatabase = transactionalManager.doTransaction((connection) -> dao.updateCard(connection, card));
-      return dtoToJson(cardFromDatabase);
-    } else {
-      throw new NoSuchEntityException("no card with number: " + cardBalanceUpdate.getNumber());
-    }
+  public String deposit(CardBalanceUpdateRequest cardBalanceUpdate)
+      throws JsonProcessingException, TransactionFailedException {
+    CardBalanceUpdateRequest cardBalanceUpdateRequest = transactionalManager
+        .doTransaction((connection) -> dao.updateCardBalance(connection, cardBalanceUpdate));
+    return dtoToJson(cardBalanceUpdateRequest);
   }
 }

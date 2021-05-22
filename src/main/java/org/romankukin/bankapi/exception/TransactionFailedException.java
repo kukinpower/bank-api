@@ -1,8 +1,8 @@
 package org.romankukin.bankapi.exception;
 
-import java.sql.SQLException;
+import java.io.FileNotFoundException;
 
-public class TransactionFailedException extends SQLException {
+public class TransactionFailedException extends FileNotFoundException {
 
   private static final String message = "Transaction failed exception";
 

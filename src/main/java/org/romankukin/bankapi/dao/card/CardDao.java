@@ -17,9 +17,9 @@ public interface CardDao {
 
   CardBalanceUpdateRequest updateCardBalance(Connection connection, CardBalanceUpdateRequest cardBalanceUpdateRequest);
 
-  Card updateCard(Connection connection, Card card);
+  Optional<Card> updateCard(Connection connection, Card card);
 
-  boolean createCard(Connection connection, Card card);
+  Optional<Card> createCard(Connection connection, Card card);
 
-  boolean deleteCard(Connection connection, Card card);
+  Optional<Card> deleteCard(Connection connection, Card card);
 }
