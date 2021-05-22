@@ -2,18 +2,9 @@ package org.romankukin.bankapi.exception;
 
 public class CardClosedException extends IllegalStateException {
 
+  private static final String CARD_IS_CLOSED = "This card is closed";
+
   public CardClosedException() {
-  }
-
-  public CardClosedException(String s) {
-    super(s);
-  }
-
-  public CardClosedException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public CardClosedException(Throwable cause) {
-    super(cause);
+    super(CARD_IS_CLOSED);
   }
 }

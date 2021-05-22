@@ -31,14 +31,15 @@ public class CardDaoImpl implements CardDao, Dao {
   private final static String GET_ALL_FROM_CARD = "select * from card";
   private final static String FIND_CARD = "select * from card where number = '%s'";
   private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
+  private final static String GET_CARD_STATUS = "select status from card where number = '%s'";
   private static final String DELETE_CARD = "delete from card where number = ?";
-  private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ?";
+  private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ? and status != 3";
   private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ?";
-  private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ? where number = ?";
+  private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ? where number = ? and status != 3";
 
-  private static final String NO_SUCH_CARD = "No card with this number in database";
+  private static final String NO_SUCH_CARD = "No card with this number in database. Or it is already closed.";
 
-  private DataSource dataSource;
+  private final DataSource dataSource;
 
   public CardDaoImpl(DataSource dataSource) {
     this.dataSource = dataSource;
@@ -72,15 +73,36 @@ public class CardDaoImpl implements CardDao, Dao {
     }
   }
 
+  @Override
   public BigDecimal getCardBalance(String numberId) throws NoSuchEntityInDatabaseException {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
-        try (ResultSet resultSet = statement.executeQuery(String.format(GET_CARD_BALANCE, numberId))) {
+        try (ResultSet resultSet = statement
+            .executeQuery(String.format(GET_CARD_BALANCE, numberId))) {
           if (!resultSet.next()) {
             throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
           }
 
           return resultSet.getBigDecimal(1);
+        }
+      }
+    } catch (SQLException e) {
+      logger.error(e.getMessage());
+      throw new DatabaseQueryException();
+    }
+  }
+
+  @Override
+  public CardStatus getCardStatus(String numberId) throws NoSuchEntityInDatabaseException {
+    try (Connection connection = dataSource.getConnection()) {
+      try (Statement statement = connection.createStatement()) {
+        try (ResultSet resultSet = statement
+            .executeQuery(String.format(GET_CARD_STATUS, numberId))) {
+          if (!resultSet.next()) {
+            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
+          }
+
+          return CardStatus.getCardStatusById(resultSet.getInt(1));
         }
       }
     } catch (SQLException e) {
@@ -125,11 +147,14 @@ public class CardDaoImpl implements CardDao, Dao {
     }
   }
 
-  public CardBalanceUpdateRequest updateCardBalance(Connection connection, CardBalanceUpdateRequest cardBalanceUpdateRequest) {
+  public CardBalanceUpdateRequest updateCardBalance(Connection connection,
+      CardBalanceUpdateRequest cardBalanceUpdateRequest) throws NoSuchEntityInDatabaseException {
     try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_BALANCE)) {
       preparedStatement.setBigDecimal(1, cardBalanceUpdateRequest.getAmount());
       preparedStatement.setString(2, cardBalanceUpdateRequest.getNumber());
-      preparedStatement.executeUpdate();
+      if (preparedStatement.executeUpdate() == 0) {
+        throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
+      }
       return cardBalanceUpdateRequest;
     } catch (SQLException e) {
       logger.error(e.getMessage());
@@ -147,7 +172,9 @@ public class CardDaoImpl implements CardDao, Dao {
       }
       preparedStatement.setInt(2, card.getStatus().getCode());
       preparedStatement.setString(3, card.getNumber());
-      preparedStatement.executeUpdate();
+      if (preparedStatement.executeUpdate() == 0) {
+        throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
+      }
 
       return Optional.of(card);
     } catch (SQLException e) {
@@ -155,6 +182,7 @@ public class CardDaoImpl implements CardDao, Dao {
       throw new DatabaseQueryException();
     }
   }
+
   @Override
   public Optional<Card> createCard(Connection connection, Card card) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_CARD)) {
@@ -173,7 +201,8 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public CardNumberDeleteRequest deleteCard(Connection connection, CardNumberDeleteRequest cardNumberDeleteRequest) {
+  public CardNumberDeleteRequest deleteCard(Connection connection,
+      CardNumberDeleteRequest cardNumberDeleteRequest) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CARD)) {
       preparedStatement.setString(1, cardNumberDeleteRequest.getNumber());
       preparedStatement.executeUpdate();

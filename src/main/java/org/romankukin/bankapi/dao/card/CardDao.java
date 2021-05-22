@@ -1,5 +1,6 @@
 package org.romankukin.bankapi.dao.card;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
@@ -8,6 +9,7 @@ import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.Card;
+import org.romankukin.bankapi.model.CardStatus;
 
 public interface CardDao {
 
@@ -15,9 +17,14 @@ public interface CardDao {
 
   List<Card> getAllEntities() throws NoSuchEntityInDatabaseException;
 
+  BigDecimal getCardBalance(String numberId) throws NoSuchEntityInDatabaseException;
+
+  CardStatus getCardStatus(String numberId) throws NoSuchEntityInDatabaseException;
+
   CardStatusUpdateRequest updateCardStatus(Connection connection, CardStatusUpdateRequest cardStatusUpdateRequest);
 
-  CardBalanceUpdateRequest updateCardBalance(Connection connection, CardBalanceUpdateRequest cardBalanceUpdateRequest);
+  CardBalanceUpdateRequest updateCardBalance(Connection connection, CardBalanceUpdateRequest cardBalanceUpdateRequest)
+      throws NoSuchEntityInDatabaseException;
 
   Optional<Card> updateCard(Connection connection, Card card);
 

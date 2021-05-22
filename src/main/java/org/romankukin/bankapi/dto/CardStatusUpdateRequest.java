@@ -22,6 +22,11 @@ public class CardStatusUpdateRequest {
   public CardStatusUpdateRequest() {
   }
 
+  public CardStatusUpdateRequest(String number, int status) {
+    this.number = number;
+    this.status = status;
+  }
+
   public int getStatus() {
     return status;
   }

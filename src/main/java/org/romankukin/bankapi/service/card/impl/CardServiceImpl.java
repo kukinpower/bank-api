@@ -13,6 +13,7 @@ import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
+import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
 import org.romankukin.bankapi.exception.TransactionFailedException;
@@ -55,7 +56,8 @@ public class CardServiceImpl implements Service, CardService, BankService {
 
   public String addNewCardToDatabase(Card card) throws JsonProcessingException {
     try {
-      Optional<Card> entity = transactionalManager.doTransaction((connection) -> dao.createCard(connection, card));
+      Optional<Card> entity = transactionalManager
+          .doTransaction((connection) -> dao.createCard(connection, card));
       if (entity.isPresent()) {
         return dtoToJson(card);
       }
@@ -102,7 +104,7 @@ public class CardServiceImpl implements Service, CardService, BankService {
   }
 
   public String depositCard(CardBalanceUpdateRequest cardBalanceUpdate)
-      throws JsonProcessingException, TransactionFailedException {
+      throws JsonProcessingException, TransactionFailedException, NoSuchEntityInDatabaseException {
     CardBalanceUpdateRequest cardBalanceUpdateRequest = transactionalManager
         .doTransaction((connection) -> dao.updateCardBalance(connection, cardBalanceUpdate));
     return dtoToJson(cardBalanceUpdateRequest);
