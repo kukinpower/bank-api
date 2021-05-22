@@ -93,7 +93,8 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public CardStatus getCardStatus(String numberId) throws NoSuchEntityInDatabaseException {
+  public CardStatusUpdateRequest getCardStatus(String numberId)
+      throws NoSuchEntityInDatabaseException {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
         try (ResultSet resultSet = statement
@@ -101,8 +102,7 @@ public class CardDaoImpl implements CardDao, Dao {
           if (!resultSet.next()) {
             throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
           }
-
-          return CardStatus.getCardStatusById(resultSet.getInt(1));
+          return new CardStatusUpdateRequest(numberId, resultSet.getInt(1));
         }
       }
     } catch (SQLException e) {

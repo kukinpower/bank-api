@@ -9,7 +9,6 @@ import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.Card;
-import org.romankukin.bankapi.model.CardStatus;
 
 public interface CardDao {
 
@@ -19,7 +18,7 @@ public interface CardDao {
 
   BigDecimal getCardBalance(String numberId) throws NoSuchEntityInDatabaseException;
 
-  CardStatus getCardStatus(String numberId) throws NoSuchEntityInDatabaseException;
+  CardStatusUpdateRequest getCardStatus(String numberId) throws NoSuchEntityInDatabaseException;
 
   CardStatusUpdateRequest updateCardStatus(Connection connection, CardStatusUpdateRequest cardStatusUpdateRequest);
 

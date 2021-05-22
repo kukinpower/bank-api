@@ -13,6 +13,7 @@ import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dto.CardUpdateRequest;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.CardStatus;
+import org.romankukin.bankapi.service.ResponseStatus;
 import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +30,8 @@ public class CardHandler extends BankHandler implements HttpHandler {
     this.service = service;
   }
 
-  private void handleResponse(HttpExchange exchange, String response) throws IOException {
-    exchange.sendResponseHeaders(200, response.length());
+  private void handleResponse(HttpExchange exchange, ResponseStatus status, String response) throws IOException {
+    exchange.sendResponseHeaders(status.getCode(), response.length());
     OutputStream outputStream = exchange.getResponseBody();
 
     outputStream.write(response.getBytes(StandardCharsets.UTF_8));
@@ -38,17 +39,15 @@ public class CardHandler extends BankHandler implements HttpHandler {
     outputStream.close();
   }
 
-  private static final String BAD_REQUEST = "Bad request";
+  private static final String BAD_REQUEST_MESSAGE = "Bad request";
 
   private void handleErrorResponse(HttpExchange exchange, Throwable throwable) throws IOException {
     String errorMessage = throwable.getMessage();
     if (throwable instanceof NoSuchEntityInDatabaseException) {
-      exchange.sendResponseHeaders(404, errorMessage.length());
-    } else if (throwable instanceof IOException) {
-      errorMessage = BAD_REQUEST;
-      exchange.sendResponseHeaders(400, errorMessage.length());
+      exchange.sendResponseHeaders(ResponseStatus.NOT_FOUND.getCode(), errorMessage.length());
     } else {
-      exchange.sendResponseHeaders(400, errorMessage.length());
+      errorMessage = BAD_REQUEST_MESSAGE;
+      exchange.sendResponseHeaders(ResponseStatus.BAD_REQUEST.getCode(), errorMessage.length());
     }
     OutputStream outputStream = exchange.getResponseBody();
 
@@ -65,11 +64,7 @@ public class CardHandler extends BankHandler implements HttpHandler {
 
   private String handlePost(HttpExchange ex, String path)
       throws IOException {
-    logger.debug("POST {}", path);
-
     switch (path) {
-      case "api/card":
-        return service.addNewCardToDatabase(extractObjectFromJson(ex, AccountNumberRequest.class));
       case "api/card/activate":
         return service.updateCardStatus(createCardUpdateStatus(ex, CardStatus.ACTIVE));
       case "api/card/close":
@@ -86,7 +81,6 @@ public class CardHandler extends BankHandler implements HttpHandler {
   }
 
   private String handleGet(HttpExchange exchange, String path) throws IOException {
-    logger.debug("GET {}", path);
     //all needing nothing
     if ("api/card/all".equals(path)) {
       return service.getAllCards();
@@ -101,6 +95,8 @@ public class CardHandler extends BankHandler implements HttpHandler {
         return service.getCard(params.get("number"));
       case "api/card/balance":
         return service.getCardBalance(params.get("number"));
+      case "api/card/status":
+        return service.getCardStatus(params.get("number"));
     }
     throw new IllegalArgumentException();
   }
@@ -112,14 +108,23 @@ public class CardHandler extends BankHandler implements HttpHandler {
     String response = null;
     try {
       if ("GET".equals(exchange.getRequestMethod())) {
+        logger.debug("GET {}", path);
         response = handleGet(exchange, path);
       } else if ("POST".equals(exchange.getRequestMethod())) {
-        response = handlePost(exchange, path);
+        logger.debug("POST {}", path);
+        if ("api/card".equals(path)) {
+          response = service.addNewCardToDatabase(extractObjectFromJson(exchange, AccountNumberRequest.class));
+          handleResponse(exchange, ResponseStatus.CREATED, response);
+          exchange.close();
+          return;
+        } else {
+          response = handlePost(exchange, path);
+        }
       }
       if (response == null) {
         handleErrorResponse(exchange, new IllegalArgumentException());
       } else {
-        handleResponse(exchange, response);
+        handleResponse(exchange, ResponseStatus.OK, response);
       }
     } catch (Exception e) {
       logger.debug(e.getMessage());
