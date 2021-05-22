@@ -11,18 +11,19 @@ import org.romankukin.bankapi.controller.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.controller.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.controller.dto.CardUpdateRequest;
+import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * 1) Выпуск новой карты по счету
- * 2) Просмотр списка карт
- * 3) Внесение средств
- * 4) Проверка баланса
+ * 1) Выпуск новой карты по счету 2) Просмотр списка карт 3) Внесение средств 4) Проверка баланса
  */
 public class CardHandler extends BankHandler implements HttpHandler {
 
   private final CardServiceImpl service;
+  private static final Logger logger = LoggerFactory.getLogger(CardHandler.class);
 
   public CardHandler(CardServiceImpl service) {
     this.service = service;
@@ -37,9 +38,18 @@ public class CardHandler extends BankHandler implements HttpHandler {
     outputStream.close();
   }
 
+  private static final String BAD_REQUEST = "Bad request";
+
   private void handleErrorResponse(HttpExchange exchange, Throwable throwable) throws IOException {
     String errorMessage = throwable.getMessage();
-    exchange.sendResponseHeaders(400, errorMessage.length());
+    if (throwable instanceof NoSuchEntityInDatabaseException) {
+      exchange.sendResponseHeaders(404, errorMessage.length());
+    } else if (throwable instanceof IOException) {
+      errorMessage = BAD_REQUEST;
+      exchange.sendResponseHeaders(400, errorMessage.length());
+    } else {
+      exchange.sendResponseHeaders(400, errorMessage.length());
+    }
     OutputStream outputStream = exchange.getResponseBody();
 
     outputStream.write(errorMessage.getBytes(StandardCharsets.UTF_8));
@@ -55,6 +65,7 @@ public class CardHandler extends BankHandler implements HttpHandler {
 
   private String handlePost(HttpExchange ex, String path)
       throws IOException {
+    logger.debug("POST {}", path);
 
     switch (path) {
       case "api/card":
@@ -74,8 +85,8 @@ public class CardHandler extends BankHandler implements HttpHandler {
     throw new IllegalArgumentException();
   }
 
-  private String handleGet(HttpExchange exchange, String path)
-      throws IOException {
+  private String handleGet(HttpExchange exchange, String path) throws IOException {
+    logger.debug("GET {}", path);
     //all needing nothing
     if ("api/card/all".equals(path)) {
       return service.getAllCards();
@@ -83,6 +94,7 @@ public class CardHandler extends BankHandler implements HttpHandler {
 
     //all needing params
     Map<String, String> params = getParametersFromQuery(exchange);
+    logger.debug("PARAMS: {}", params);
 
     switch (path) {
       case "api/card":
@@ -110,7 +122,7 @@ public class CardHandler extends BankHandler implements HttpHandler {
         handleResponse(exchange, response);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.debug(e.getMessage());
       handleErrorResponse(exchange, e);
     }
     exchange.close();

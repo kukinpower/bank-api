@@ -14,4 +14,11 @@ public class CardUpdateRequest {
   public void setNumber(String number) {
     Number = number;
   }
+
+  @Override
+  public String toString() {
+    return "CardUpdateRequest{" +
+        "Number='" + Number + '\'' +
+        '}';
+  }
 }

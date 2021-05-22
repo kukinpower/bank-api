@@ -5,8 +5,13 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BankHandler {
+
+  private static final Logger logger = LoggerFactory.getLogger(CardHandler.class);
+
   protected Map<String, String> getParametersFromQuery(HttpExchange exchange) {
     String query = exchange.getRequestURI().getQuery();
     Map<String, String> params = new LinkedHashMap<>();
@@ -20,8 +25,10 @@ public abstract class BankHandler {
   protected <T> T extractObjectFromJson(HttpExchange httpExchange, Class<T> classObject)
       throws IOException {
     ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper
-        .readValue(httpExchange.getRequestBody(), classObject);
+    T dto = objectMapper.readValue(httpExchange.getRequestBody(), classObject);
+    logger.debug("PARAMS: {}", dto);
+    return dto;
+//    return objectMapper.readValue(httpExchange.getRequestBody(), classObject);
   }
 
 }

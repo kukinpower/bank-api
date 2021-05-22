@@ -1,12 +1,9 @@
 package org.romankukin.bankapi.model;
 
 import java.math.BigDecimal;
-import java.util.Objects;
-//import org.romankukin.bankapi.BankAccount;
 
 public class Card {
 
-  //  private final int cardId;//todo
   private final String number;
   private final String pin;
   private final String account;
@@ -45,14 +42,6 @@ public class Card {
     return balance;
   }
 
-  public void increaseBalance(BigDecimal amount) {
-    balance = balance.add(amount);
-  }
-
-  public void decreaseBalance(BigDecimal amount) {
-    balance = balance.subtract(amount);
-  }
-
   public String getPin() {
     return pin;
   }
@@ -77,14 +66,36 @@ public class Card {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
+
     Card card = (Card) o;
-    return number.equals(card.number) && pin.equals(card.pin) && account.equals(card.account)
-        && currency == card.currency && balance.equals(card.balance) && status == card.status;
+
+    if (!number.equals(card.number)) {
+      return false;
+    }
+    if (!pin.equals(card.pin)) {
+      return false;
+    }
+    if (!account.equals(card.account)) {
+      return false;
+    }
+    if (currency != card.currency) {
+      return false;
+    }
+    if (!balance.equals(card.balance)) {
+      return false;
+    }
+    return status == card.status;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(number, pin, account, currency, balance, status);
+    int result = number.hashCode();
+    result = 31 * result + pin.hashCode();
+    result = 31 * result + account.hashCode();
+    result = 31 * result + currency.hashCode();
+    result = 31 * result + balance.hashCode();
+    result = 31 * result + status.hashCode();
+    return result;
   }
 
   @Override

@@ -1,5 +1,6 @@
 package org.romankukin.bankapi.dao;
 
+import org.romankukin.bankapi.exception.DatabaseQueryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.Connection;
@@ -37,7 +38,7 @@ public class TransactionalManagerSql implements TransactionalManager {
       connection.commit();
       logger.debug(TRANSACTION_FINISH);
       return res;
-    } catch (SQLException e) {
+    } catch (SQLException | DatabaseQueryException e) {
       logger.error(TRANSACTION_ERROR, e.getMessage());
       if (connection != null) {
         try {

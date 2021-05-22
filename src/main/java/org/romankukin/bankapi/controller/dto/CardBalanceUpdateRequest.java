@@ -22,4 +22,12 @@ public class CardBalanceUpdateRequest {
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
   }
+
+  @Override
+  public String toString() {
+    return "CardBalanceUpdateRequest{" +
+        "number='" + number + '\'' +
+        ", amount=" + amount +
+        '}';
+  }
 }

@@ -2,3 +2,4 @@
 *.iml
 target
 bank-api-db.mv.db
+bank-api-db.trace.db

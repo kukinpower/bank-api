@@ -81,7 +81,7 @@ public class CardServiceImpl implements Service, CardService, BankService {
     return dtoToJson(cardStatusUpdateRequest);
   }
 
-  public String getCardBalance(String cardNumber) {
+  public String getCardBalance(String cardNumber) throws NoSuchEntityInDatabaseException {
     return dao.getCardBalance(cardNumber).toPlainString();
   }
 

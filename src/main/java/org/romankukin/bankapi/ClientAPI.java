@@ -48,7 +48,6 @@ public class ClientAPI {
     mapHandlers();
     server.setExecutor(threadPoolExecutor);
     server.start();
-    System.out.println(Thread.currentThread().getName());
     logger.debug("Server started on port {}", PORT);
   }
 

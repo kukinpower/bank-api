@@ -1,6 +1,7 @@
 package org.romankukin.bankapi.dao.card.impl;
 
 import org.romankukin.bankapi.controller.dto.CardNumberDeleteRequest;
+import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
@@ -35,6 +36,8 @@ public class CardDaoImpl implements CardDao, Dao {
   private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ?";
   private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ? where number = ?";
 
+  private static final String NO_SUCH_CARD = "No card with this number in database";
+
   private DataSource dataSource;
 
   public CardDaoImpl(DataSource dataSource) {
@@ -52,11 +55,13 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public Optional<Card> getCard(String numberId) {
+  public Optional<Card> getCard(String numberId) throws NoSuchEntityInDatabaseException {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
         try (ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId))) {
-          resultSet.next();
+          if (!resultSet.next()) {
+            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
+          }
 
           return Optional.of(extractCardFromResultSet(resultSet));
         }
@@ -67,11 +72,13 @@ public class CardDaoImpl implements CardDao, Dao {
     }
   }
 
-  public BigDecimal getCardBalance(String numberId) {
+  public BigDecimal getCardBalance(String numberId) throws NoSuchEntityInDatabaseException {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
         try (ResultSet resultSet = statement.executeQuery(String.format(GET_CARD_BALANCE, numberId))) {
-          resultSet.next();
+          if (!resultSet.next()) {
+            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
+          }
 
           return resultSet.getBigDecimal(1);
         }
@@ -83,13 +90,16 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public List<Card> getAllEntities() {
+  public List<Card> getAllEntities() throws NoSuchEntityInDatabaseException {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
         try (ResultSet resultSet = statement.executeQuery(GET_ALL_FROM_CARD)) {
           List<Card> cards = new ArrayList<>();
           while (resultSet.next()) {
             cards.add(extractCardFromResultSet(resultSet));
+          }
+          if (cards.isEmpty()) {
+            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
           }
 
           return cards;

@@ -38,4 +38,12 @@ public class CardStatusUpdateRequest {
   public void setNumber(String number) {
     this.number = number;
   }
+
+  @Override
+  public String toString() {
+    return "CardStatusUpdateRequest{" +
+        "number='" + number + '\'' +
+        ", status=" + status +
+        '}';
+  }
 }

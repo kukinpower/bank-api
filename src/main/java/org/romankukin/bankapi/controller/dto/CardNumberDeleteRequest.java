@@ -12,4 +12,10 @@ public class CardNumberDeleteRequest {
     this.number = number;
   }
 
+  @Override
+  public String toString() {
+    return "CardNumberDeleteRequest{" +
+        "number='" + number + '\'' +
+        '}';
+  }
 }
