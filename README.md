@@ -41,4 +41,4 @@ On card creation return `201` status code
 If the card isn't found - `404`  
 `400` On bad request  
 If card is closed you can't update it. Even it's status  
-
+If card status is `PENDING` (`1`) it updates to `ACTIVE` (`2`) with first deposit  
