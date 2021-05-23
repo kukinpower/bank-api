@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
+import org.romankukin.bankapi.dto.CardStatusDescriptor;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.Card;
 
@@ -15,6 +16,8 @@ public interface CardDao {
   Optional<Card> getCard(String numberId) throws NoSuchEntityInDatabaseException;
 
   List<Card> getAllEntities() throws NoSuchEntityInDatabaseException;
+
+  List<CardStatusDescriptor> getAllStatus() throws NoSuchEntityInDatabaseException;
 
   BigDecimal getCardBalance(String numberId) throws NoSuchEntityInDatabaseException;
 

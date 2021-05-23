@@ -84,6 +84,8 @@ public class CardHandler extends BankHandler implements HttpHandler {
     //all needing nothing
     if ("api/card/all".equals(path)) {
       return service.getAllCards();
+    } else if ("api/card/all/status".equals(path)) {
+      return service.getAllCardsStatus();
     }
 
     //all needing params

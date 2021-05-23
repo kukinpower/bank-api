@@ -10,6 +10,7 @@ import org.romankukin.bankapi.CardSerializer;
 import org.romankukin.bankapi.dto.AccountNumberRequest;
 import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
+import org.romankukin.bankapi.dto.CardStatusDescriptor;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
@@ -94,6 +95,14 @@ public class CardServiceImpl implements Service, CardService, BankService {
 
   public String getAllCards() throws JsonProcessingException, NoSuchEntityInDatabaseException {
     List<Card> cards = dao.getAllEntities();
+    if (cards.isEmpty()) {
+      throw new NoSuchEntityInDatabaseException("table is empty");
+    }
+    return dtoToJson(cards);
+  }
+
+  public String getAllCardsStatus() throws JsonProcessingException, NoSuchEntityInDatabaseException {
+    List<CardStatusDescriptor> cards = dao.getAllStatus();
     if (cards.isEmpty()) {
       throw new NoSuchEntityInDatabaseException("table is empty");
     }

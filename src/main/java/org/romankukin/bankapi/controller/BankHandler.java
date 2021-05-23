@@ -28,7 +28,6 @@ public abstract class BankHandler {
     T dto = objectMapper.readValue(httpExchange.getRequestBody(), classObject);
     logger.debug("PARAMS: {}", dto);
     return dto;
-//    return objectMapper.readValue(httpExchange.getRequestBody(), classObject);
   }
 
 }

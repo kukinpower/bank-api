@@ -7,6 +7,9 @@ import java.util.Properties;
 
 public abstract class DatabaseConnection {
 
+  public final static String MOCK_DB_PATH = "script/create_table_mock.sql";
+  public final static String SCRIPT_PATH = "script/create_table.sql";
+
   protected abstract Properties extractProperties();
 
   public DataSource createDataSource() {
@@ -16,15 +19,5 @@ public abstract class DatabaseConnection {
     jdbcDataSource.setUser(properties.getProperty("user"));
     jdbcDataSource.setPassword(properties.getProperty("password"));
     return jdbcDataSource;
-//    } catch (SQLException e) {
-//      StringBuilder stringBuilder = new StringBuilder();
-//      for (Throwable throwable : e) {
-//        stringBuilder.append(throwable.toString()); //todo
-//      }
-//      throw new ConnectionNotEstablishedException(stringBuilder.toString(),
-//          "Could't connect to database", e);
-//    } catch (NullPointerException e) {
-//      throw new ConnectionNotEstablishedException("Bad database properties file", e);
-//    }
   }
 }

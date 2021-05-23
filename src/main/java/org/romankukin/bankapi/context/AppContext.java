@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import org.romankukin.bankapi.dao.TransactionalManagerSql;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
+import org.romankukin.bankapi.dbconnection.DatabaseConnection;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
 import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 
@@ -17,8 +18,8 @@ public class AppContext {
 
   private static final Map<String, Object> beans = new HashMap<>();
 
-  public AppContext() {
-    beans.put(DATA_SOURCE, new FileDatabaseConnection().createDataSource());
+  public AppContext(DatabaseConnection databaseConnection) {
+    beans.put(DATA_SOURCE, databaseConnection.createDataSource());
     beans.put(TRANSACTIONAL_MANAGER, new TransactionalManagerSql((DataSource) beans.get(DATA_SOURCE)));
     beans.put(CARD_DAO, new CardDaoImpl((DataSource) beans.get(DATA_SOURCE)));
     beans.put(CARD_SERVICE, new CardServiceImpl((CardDaoImpl) beans.get(CARD_DAO),

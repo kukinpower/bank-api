@@ -6,6 +6,8 @@ GET
 
 api/card/all
 
+api/card/all/status
+
 api/card?number=4000000967827322
 
 api/card/balance?number=4000000967827322
