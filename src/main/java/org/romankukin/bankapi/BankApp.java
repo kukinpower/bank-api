@@ -17,7 +17,6 @@ import org.romankukin.bankapi.controller.CardHandler;
 import org.romankukin.bankapi.controller.HelloHandler;
 import org.romankukin.bankapi.dbconnection.DatabaseConnection;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
-import org.romankukin.bankapi.dbconnection.InMemoryDatabaseConnection;
 import org.romankukin.bankapi.exception.ConnectionNotEstablishedException;
 import org.romankukin.bankapi.exception.CouldNotStartServerException;
 import org.romankukin.bankapi.service.card.impl.CardServiceImpl;

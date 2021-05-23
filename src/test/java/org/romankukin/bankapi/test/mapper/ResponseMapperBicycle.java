@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.romankukin.bankapi.test.IntegratedTest;
 
 public class ResponseMapperBicycle {
 
@@ -37,13 +38,18 @@ public class ResponseMapperBicycle {
       stringBuilder.append("\"")
           .append(entry.getKey())
           .append("\"")
-          .append(":")
-          .append("\"")
-          .append(entry.getValue())
-          .append("\"");
+          .append(":");
+      if (entry.getValue().matches(IntegratedTest.DECIMAL)) {
+        stringBuilder.append(entry.getValue());
+      } else {
+        stringBuilder.append("\"")
+            .append(entry.getValue())
+            .append("\"");
+      }
       if (i + 1 < map.size()) {
         stringBuilder.append(",");
       }
+      i++;
     }
     stringBuilder.append("}");
     return stringBuilder.toString();
