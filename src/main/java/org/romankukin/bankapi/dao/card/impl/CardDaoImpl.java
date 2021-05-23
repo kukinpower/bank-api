@@ -35,7 +35,8 @@ public class CardDaoImpl implements CardDao, Dao {
   private static final String DELETE_CARD = "delete from card where number = ?";
   private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ? and status != 3";
   private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ? and status != 3";
-  private static final String UPDATE_CARD_BALANCE = "update card set balance = balance + ? where number = ? and status != 3";
+  private static final String UPDATE_CARD_BALANCE = "update card set status = case when status = 1 then 2 else status end,"
+      + " balance = balance + ? where number = ? and status != 3";
 
   private static final String NO_SUCH_CARD = "No card with this number in database. Or it is already closed.";
 

@@ -18,11 +18,11 @@ import org.romankukin.bankapi.controller.CardHandler;
 import org.romankukin.bankapi.controller.HelloHandler;
 import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 
-public class ClientAPI {
+public class BankApp {
 
   private static final int PORT = 8080;
   private static final int BACKLOG = 0;
-  private static final Logger logger = LoggerFactory.getLogger(ClientAPI.class);
+  private static final Logger logger = LoggerFactory.getLogger(BankApp.class);
   private HttpServer server;
   private static final AppContext appContext = new AppContext();
 
@@ -52,7 +52,7 @@ public class ClientAPI {
   }
 
   public static void main(String[] args) throws IOException, SQLException {
-    ClientAPI clientAPI = new ClientAPI();
-    clientAPI.runServer();
+    BankApp bankApp = new BankApp();
+    bankApp.runServer();
   }
 }
