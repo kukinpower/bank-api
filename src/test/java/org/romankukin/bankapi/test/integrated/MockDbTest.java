@@ -3,12 +3,9 @@ package org.romankukin.bankapi.test.integrated;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,13 +44,6 @@ public class MockDbTest implements IntegratedTest {
 
     assertEquals(ResponseStatus.BAD_REQUEST.getCode(), connection.getResponseCode());
   }
-  
-  private static String getResponse(HttpURLConnection connection) throws IOException {
-    return new BufferedReader(new InputStreamReader(connection.getInputStream()))
-        .lines()
-        .collect(Collectors.joining(System.lineSeparator()));
-
-  }
 
   @Test
   void cardGetByNumberOkTest() throws IOException {
@@ -65,7 +55,7 @@ public class MockDbTest implements IntegratedTest {
 
     String response = getResponse(connection);
 
-    assertTrue(response.matches(CARD_STATUS_REGEX), "Card status: " + response);
+    assertTrue(response.matches(CARD_REGEX), "Card status: " + response);
     assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());
   }
 
@@ -79,7 +69,7 @@ public class MockDbTest implements IntegratedTest {
 
     String response = getResponse(connection);
 
-    assertTrue(response.matches(CARD_STATUS_REGEX), "Card status: " + response);
+    assertTrue(response.matches(CARD_STATUS_AND_NUMBER_REGEX), "Card status: " + response);
     assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());
   }
 

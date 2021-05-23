@@ -2,11 +2,9 @@ package org.romankukin.bankapi.service.card.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import org.romankukin.bankapi.justincase.CardSerializer;
 import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.dto.AccountNumberRequest;
@@ -32,16 +30,8 @@ public class CardServiceImpl implements Service, CardService, BankService {
 
   public CardServiceImpl(CardDaoImpl dao, TransactionalManager transactionalManager) {
     this.dao = dao;
-    this.mapper = createCardObjectMapper();
+    this.mapper = new ObjectMapper();
     this.transactionalManager = transactionalManager;
-  }
-
-  private static ObjectMapper createCardObjectMapper() {
-    ObjectMapper mapper = new ObjectMapper();
-    SimpleModule module = new SimpleModule();
-    module.addSerializer(Card.class, new CardSerializer());
-    mapper.registerModule(module);
-    return mapper;
   }
 
   private Card createCardByAccountNumber(AccountNumberRequest accountNumberRequest) {
