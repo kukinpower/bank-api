@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -62,32 +63,21 @@ public class ApiTest {
   }
 
   @Test
-  void testInMemDbCreation() throws IOException {
+  void testGetCardByNumberOnEmptyDatabase() throws IOException {
     if (app.isRunning()) {
       app.stop();
     }
     BankApp appInMem = new BankApp(new InMemoryDatabaseConnection());
-    appInMem.initDatabase(DatabaseConnection.MOCK_DB_PATH);
+    appInMem.initDatabase(DatabaseConnection.MOCK_DB_EMPTY_PATH);
     appInMem.runServer();
 
-    URL url = new URL("http://localhost:8080/api/card");
+    String request = new ResponseMapperBicycle("number", "4000006080001109").toParams();
+    URL url = new URL("http://localhost:8080/api/card" + request);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-    connection.setRequestMethod(POST);
+    connection.setRequestMethod(GET);
     connection.setRequestProperty("Content-Type", "application/json");
     connection.setRequestProperty("Connection", "keep-alive");
-    connection.setDoOutput(true);
 
-    String request = new ResponseMapperBicycle("account", "12345123451234512345").toJson();
-    try (OutputStream outputStream = connection.getOutputStream()) {
-      byte[] bytes = request.getBytes(StandardCharsets.UTF_8);
-      outputStream.write(bytes, 0, bytes.length);
-    }
-
-    String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-        .lines()
-        .collect(Collectors.joining(System.lineSeparator()));
-
-    assertTrue(response.matches(CARD_REGEX), "Card: " + response);
-    assertEquals(ResponseStatus.CREATED.getCode(), connection.getResponseCode());
+    assertEquals(ResponseStatus.NOT_FOUND.getCode(), connection.getResponseCode());
   }
 }

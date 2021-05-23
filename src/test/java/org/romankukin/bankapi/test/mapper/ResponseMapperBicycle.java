@@ -50,7 +50,7 @@ public class ResponseMapperBicycle {
   }
 
   public String toParams() {
-    StringBuilder stringBuilder = new StringBuilder();
+    StringBuilder stringBuilder = new StringBuilder("?");
 
     int i = 0;
     for (Entry<String, String> entry : map.entrySet()) {

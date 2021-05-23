@@ -16,6 +16,7 @@ import org.romankukin.bankapi.context.AppContext;
 import org.romankukin.bankapi.controller.CardHandler;
 import org.romankukin.bankapi.controller.HelloHandler;
 import org.romankukin.bankapi.dbconnection.DatabaseConnection;
+import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
 import org.romankukin.bankapi.dbconnection.InMemoryDatabaseConnection;
 import org.romankukin.bankapi.exception.ConnectionNotEstablishedException;
 import org.romankukin.bankapi.exception.CouldNotStartServerException;
@@ -78,8 +79,7 @@ public class BankApp {
   }
 
   public static void main(String[] args) {
-//    BankApp bankApp = new BankApp(new FileDatabaseConnection());
-    BankApp bankApp = new BankApp(new InMemoryDatabaseConnection());
+    BankApp bankApp = new BankApp(new FileDatabaseConnection());
     bankApp.initDatabase(DatabaseConnection.SCRIPT_PATH);
     bankApp.runServer();
   }
