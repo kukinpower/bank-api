@@ -11,13 +11,15 @@ import java.sql.SQLException;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.romankukin.bankapi.BankApp;
+import org.romankukin.bankapi.service.ResponseStatus;
 import org.romankukin.bankapi.test.mapper.ResponseMapperBicycle;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApiTest {
 
   private static final String POST = "POST";
   private static final String GET = "GET";
-  private static final int CONNECTION_TIMEOUT = 10;
   private static final String CARD_REGEX =
       "^\\{\\s*\"number\"\\s*:\\s*\"[0-9]{16}\","
       + "\\s*\"pin\"\\s*:\\s*\"[0-9]{4}\","
@@ -55,7 +57,9 @@ public class ApiTest {
     String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
         .lines()
         .collect(Collectors.joining(System.lineSeparator()));
-    org.junit.jupiter.api.Assertions.assertTrue(response.matches(CARD_REGEX), "Card: " + response);
+
+    assertTrue(response.matches(CARD_REGEX), "Card: " + response);
+    assertEquals(ResponseStatus.CREATED.getCode(), connection.getResponseCode());
   }
 
 }
