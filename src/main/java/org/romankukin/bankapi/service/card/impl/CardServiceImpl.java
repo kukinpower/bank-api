@@ -69,7 +69,7 @@ public class CardServiceImpl implements Service, CardService, BankService {
   }
 
   private void validateCardNumber(String cardNumber) {
-    if (!cardNumber.matches("^[0-9]{16}$") || isValidCardNumberLuhnAlgorithm(cardNumber)) {
+    if (!cardNumber.matches("^[0-9]{16}$") || !isValidCardNumberLuhnAlgorithm(cardNumber)) {
       throw new IllegalArgumentException("Bad card number argument: " + cardNumber);
     }
   }
