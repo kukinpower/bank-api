@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.test;
+package org.romankukin.bankapi.test.integrated;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,9 +18,10 @@ import org.romankukin.bankapi.BankApp;
 import org.romankukin.bankapi.dbconnection.DatabaseConnection;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
 import org.romankukin.bankapi.service.ResponseStatus;
+import org.romankukin.bankapi.test.IntegratedTest;
 import org.romankukin.bankapi.test.mapper.ResponseMapperBicycle;
 
-public class ApiTest implements IntegratedTest {
+public class FileDbTest implements IntegratedTest {
 
   private static BankApp app;
 

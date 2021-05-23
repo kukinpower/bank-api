@@ -47,6 +47,27 @@ public class MockDbTest implements IntegratedTest {
 
     assertEquals(ResponseStatus.BAD_REQUEST.getCode(), connection.getResponseCode());
   }
+  
+  private static String getResponse(HttpURLConnection connection) throws IOException {
+    return new BufferedReader(new InputStreamReader(connection.getInputStream()))
+        .lines()
+        .collect(Collectors.joining(System.lineSeparator()));
+
+  }
+
+  @Test
+  void cardGetByNumberOkTest() throws IOException {
+    String request = new ResponseMapperBicycle("number", "4000006080001109").toParams();
+    URL url = new URL(createUrl("api/card", request));
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    connection.setRequestMethod(GET);
+    connection.setRequestProperty("Content-Type", "application/json");
+
+    String response = getResponse(connection);
+
+    assertTrue(response.matches(CARD_STATUS_REGEX), "Card status: " + response);
+    assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());
+  }
 
   @Test
   void cardStatusByNumberTest() throws IOException {
@@ -56,9 +77,7 @@ public class MockDbTest implements IntegratedTest {
     connection.setRequestMethod(GET);
     connection.setRequestProperty("Content-Type", "application/json");
 
-    String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-        .lines()
-        .collect(Collectors.joining(System.lineSeparator()));
+    String response = getResponse(connection);
 
     assertTrue(response.matches(CARD_STATUS_REGEX), "Card status: " + response);
     assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());
@@ -71,10 +90,8 @@ public class MockDbTest implements IntegratedTest {
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(GET);
     connection.setRequestProperty("Content-Type", "application/json");
-
-    String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-        .lines()
-        .collect(Collectors.joining(System.lineSeparator()));
+    
+    String response = getResponse(connection);
 
     assertTrue(response.matches(CARD_BALANCE_REGEX), "Card balance: " + response);
     assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());
@@ -87,9 +104,7 @@ public class MockDbTest implements IntegratedTest {
     connection.setRequestMethod(GET);
     connection.setRequestProperty("Content-Type", "application/json");
 
-    String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-        .lines()
-        .collect(Collectors.joining(System.lineSeparator()));
+    String response = getResponse(connection);
 
     assertTrue(response.matches(CARD_ARRAY_REGEX), "Cards: " + response);
     assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());
@@ -102,9 +117,7 @@ public class MockDbTest implements IntegratedTest {
     connection.setRequestMethod(GET);
     connection.setRequestProperty("Content-Type", "application/json");
 
-    String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-        .lines()
-        .collect(Collectors.joining(System.lineSeparator()));
+    String response = getResponse(connection);
 
     assertTrue(response.matches(CARD_STATUS_ARRAY_REGEX), "Cards status: " + response);
     assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());

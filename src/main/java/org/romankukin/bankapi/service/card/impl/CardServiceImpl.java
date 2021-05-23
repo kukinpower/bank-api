@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import org.romankukin.bankapi.CardSerializer;
+import org.romankukin.bankapi.justincase.CardSerializer;
 import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.dto.AccountNumberRequest;
