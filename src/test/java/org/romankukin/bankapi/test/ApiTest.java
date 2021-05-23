@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.romankukin.bankapi.BankApp;
 import org.romankukin.bankapi.dbconnection.DatabaseConnection;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
-import org.romankukin.bankapi.dbconnection.InMemoryDatabaseConnection;
 import org.romankukin.bankapi.service.ResponseStatus;
 import org.romankukin.bankapi.test.mapper.ResponseMapperBicycle;
 
@@ -41,12 +39,11 @@ public class ApiTest implements IntegratedTest {
   }
 
   @Test
-  void testApiCardCreate() throws IOException {
+  void cardCreateTest() throws IOException {
     URL url = new URL(createUrl("api/card"));
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(POST);
     connection.setRequestProperty("Content-Type", "application/json");
-    connection.setRequestProperty("Connection", "keep-alive");
     connection.setDoOutput(true);
 
     String request = new ResponseMapperBicycle("account", "12345123451234512345").toJson();
