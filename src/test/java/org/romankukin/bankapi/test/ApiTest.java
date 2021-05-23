@@ -5,61 +5,26 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.romankukin.bankapi.BankApp;
-
-class JsonMapperBicycle {
-  private Map<String, String> map;
-
-  public JsonMapperBicycle() {
-    this.map = new LinkedHashMap<>();
-  }
-
-  public JsonMapperBicycle(String... args) {
-    this.map = new LinkedHashMap<>();
-    for (int i = 0; i < args.length; i += 2) {
-      map.put(args[i], args[i + 1]);
-    }
-  }
-
-  public void put(String key, String value) {
-    map.put(key, value);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder stringBuilder = new StringBuilder("{");
-
-    int i = 0;
-    for (Entry<String, String> entry : map.entrySet()) {
-      stringBuilder.append("\"")
-          .append(entry.getKey())
-          .append("\"")
-          .append(":")
-          .append("\"")
-          .append(entry.getValue())
-          .append("\"");
-      if (i + 1 < map.size()) {
-        stringBuilder.append(",");
-      }
-    }
-    stringBuilder.append("}");
-    return stringBuilder.toString();
-  }
-}
+import org.romankukin.bankapi.test.mapper.ResponseMapperBicycle;
 
 public class ApiTest {
 
   private static final String POST = "POST";
   private static final String GET = "GET";
+  private static final int CONNECTION_TIMEOUT = 10;
+  private static final String CARD_REGEX =
+      "^\\{\\s*\"number\"\\s*:\\s*\"[0-9]{16}\","
+      + "\\s*\"pin\"\\s*:\\s*\"[0-9]{4}\","
+      + "\\s*\"account\"\\s*:\\s*\"[0-9]{20}\","
+      + "\\s*\"currency\"\\s*:\\s*\"[A-Z]{3}\","
+      + "\\s*\"balance\"\\s*:\\s*[0-9]+[.,]?[0-9]*,"
+      + "\\s*\"status\"\\s*:\\s*[0-9]+\\s*}\\s*$";
 
   private static final BankApp app = new BankApp();
   static {
@@ -81,7 +46,7 @@ public class ApiTest {
     connection.setRequestProperty("Connection", "keep-alive");
     connection.setDoOutput(true);
 
-    String request = new JsonMapperBicycle("account", "12345123451234512345").toString();
+    String request = new ResponseMapperBicycle("account", "12345123451234512345").toJson();
     try (OutputStream outputStream = connection.getOutputStream()) {
       byte[] bytes = request.getBytes(StandardCharsets.UTF_8);
       outputStream.write(bytes, 0, bytes.length);
@@ -90,8 +55,7 @@ public class ApiTest {
     String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
         .lines()
         .collect(Collectors.joining(System.lineSeparator()));
-
-    System.out.println(response);
+    org.junit.jupiter.api.Assertions.assertTrue(response.matches(CARD_REGEX), "Card: " + response);
   }
 
 }
