@@ -80,4 +80,26 @@ public class ApiTest {
 
     assertEquals(ResponseStatus.NOT_FOUND.getCode(), connection.getResponseCode());
   }
+
+  @Test
+  void testGetCardByNumberOn() throws IOException {
+    if (app.isRunning()) {
+      app.stop();
+    }
+    BankApp appInMem = new BankApp(new InMemoryDatabaseConnection());
+    appInMem.initDatabase(DatabaseConnection.MOCK_DB_PATH);
+    appInMem.runServer();
+
+    String request = new ResponseMapperBicycle("number", "some-text").toParams();
+    URL url = new URL("http://localhost:8080/api/card" + request);
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    connection.setRequestMethod(GET);
+    connection.setRequestProperty("Content-Type", "application/json");
+    connection.setRequestProperty("Connection", "keep-alive");
+
+    assertEquals(ResponseStatus.BAD_REQUEST.getCode(), connection.getResponseCode());
+  }
+
+
+
 }

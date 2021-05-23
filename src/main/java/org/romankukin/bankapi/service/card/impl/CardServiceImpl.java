@@ -7,14 +7,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.romankukin.bankapi.CardSerializer;
+import org.romankukin.bankapi.dao.TransactionalManager;
+import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.dto.AccountNumberRequest;
 import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
 import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusDescriptor;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
-import org.romankukin.bankapi.dao.TransactionalManager;
-import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
-import org.romankukin.bankapi.exception.CardClosedException;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
 import org.romankukin.bankapi.exception.TransactionFailedException;
@@ -56,6 +55,7 @@ public class CardServiceImpl implements Service, CardService, BankService {
   }
 
   public String addNewCardToDatabase(Card card) throws JsonProcessingException {
+    validateCardNumber(card.getNumber());
     try {
       Optional<Card> entity = transactionalManager
           .doTransaction((connection) -> dao.createCard(connection, card));
@@ -68,8 +68,15 @@ public class CardServiceImpl implements Service, CardService, BankService {
     throw new ObjectNotCreatedException(card.toString());
   }
 
+  private void validateCardNumber(String cardNumber) {
+    if (!cardNumber.matches("^[0-9]{16}$") || isValidCardNumberLuhnAlgorithm(cardNumber)) {
+      throw new IllegalArgumentException("Bad card number argument: " + cardNumber);
+    }
+  }
+
   public String getCard(String cardNumber)
       throws JsonProcessingException, NoSuchEntityInDatabaseException {
+    validateCardNumber(cardNumber);
     Optional<Card> entity = dao.getCard(cardNumber);
     if (!entity.isPresent()) {
       throw new NoSuchEntityInDatabaseException("table is empty");
@@ -79,17 +86,20 @@ public class CardServiceImpl implements Service, CardService, BankService {
 
   public String updateCardStatus(CardStatusUpdateRequest cardStatusUpdate)
       throws TransactionFailedException, JsonProcessingException {
+    validateCardNumber(cardStatusUpdate.getNumber());
     CardStatusUpdateRequest cardStatusUpdateRequest = transactionalManager
         .doTransaction((connection) -> dao.updateCardStatus(connection, cardStatusUpdate));
     return dtoToJson(cardStatusUpdateRequest);
   }
 
   public String getCardBalance(String cardNumber) throws NoSuchEntityInDatabaseException {
+    validateCardNumber(cardNumber);
     return dao.getCardBalance(cardNumber).toPlainString();
   }
 
   public String getCardStatus(String cardNumber)
       throws NoSuchEntityInDatabaseException, JsonProcessingException {
+    validateCardNumber(cardNumber);
     return dtoToJson(dao.getCardStatus(cardNumber));
   }
 
@@ -119,6 +129,7 @@ public class CardServiceImpl implements Service, CardService, BankService {
 
   public String depositCard(CardBalanceUpdateRequest cardBalanceUpdate)
       throws JsonProcessingException, TransactionFailedException, NoSuchEntityInDatabaseException {
+    validateCardNumber(cardBalanceUpdate.getNumber());
     CardBalanceUpdateRequest cardBalanceUpdateRequest = transactionalManager
         .doTransaction((connection) -> dao.updateCardBalance(connection, cardBalanceUpdate));
     return dtoToJson(cardBalanceUpdateRequest);
@@ -126,6 +137,7 @@ public class CardServiceImpl implements Service, CardService, BankService {
 
   public String deleteCard(CardNumberDeleteRequest cardNumberDeleteRequest)
       throws JsonProcessingException, TransactionFailedException {
+    validateCardNumber(cardNumberDeleteRequest.getNumber());
     CardNumberDeleteRequest cardNumberDelete = transactionalManager
         .doTransaction((connection) -> dao.deleteCard(connection, cardNumberDeleteRequest));
     return dtoToJson(cardNumberDelete);
