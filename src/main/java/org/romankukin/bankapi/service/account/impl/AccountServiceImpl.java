@@ -1,6 +1,7 @@
 package org.romankukin.bankapi.service.account.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.math.BigDecimal;
 import java.util.Optional;
 import org.romankukin.bankapi.dao.account.AccountDao;
 import org.romankukin.bankapi.dto.account.AccountCreateRequest;
@@ -25,7 +26,7 @@ public class AccountServiceImpl implements Service, AccountService {
   @Override
   public String addNewAccountToDatabase(ClientPhoneRequest accountNumberRequest) throws JsonProcessingException {
     AccountCreateRequest accountCreateRequest = new AccountCreateRequest(generateAccountNumber(),
-        accountNumberRequest.getPhone());
+        BigDecimal.ZERO, accountNumberRequest.getPhone());
     try {
       Optional<AccountCreateRequest> entity = transactionalManager.doTransaction((connection) -> dao.createAccount(connection, accountCreateRequest));
       if (entity.isPresent()) {

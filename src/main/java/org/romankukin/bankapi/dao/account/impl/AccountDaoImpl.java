@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class AccountDaoImpl implements AccountDao {
   private static final Logger logger = LoggerFactory.getLogger(CardDaoImpl.class);
 
-  private final static String CREATE_ACCOUNT = "insert into account(number, clientId) values (?, (select id from client where client.phone = ?))";
+  private final static String CREATE_ACCOUNT = "insert into account(number, balance, clientId) values (?, ?, (select id from client where client.phone = ?))";
   private final static String GET_ALL_FROM_CARD = "select * from card";
   private final static String FIND_CARD = "select * from card where number = '%s'";
   private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
@@ -35,11 +35,12 @@ public class AccountDaoImpl implements AccountDao {
     this.dataSource = dataSource;
   }
 
-//  @Override
+  @Override
   public Optional<AccountCreateRequest> createAccount(Connection connection, AccountCreateRequest accountCreateRequest) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_ACCOUNT)) {
       preparedStatement.setString(1, accountCreateRequest.getNumber());
-      preparedStatement.setString(2, accountCreateRequest.getPhone());
+      preparedStatement.setBigDecimal(2, accountCreateRequest.getBalance());
+      preparedStatement.setString(3, accountCreateRequest.getPhone());
       preparedStatement.executeUpdate();
       return Optional.of(accountCreateRequest);
     } catch (SQLException e) {

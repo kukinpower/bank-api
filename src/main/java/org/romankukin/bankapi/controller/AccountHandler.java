@@ -3,17 +3,11 @@ package org.romankukin.bankapi.controller;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
-import org.romankukin.bankapi.dto.card.CardStatusUpdateRequest;
-import org.romankukin.bankapi.dto.card.CardUpdateRequest;
 import org.romankukin.bankapi.dto.client.ClientPhoneRequest;
-import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.service.account.AccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * 1) Выпуск новой карты по счету 2) Просмотр списка карт 3) Внесение средств 4) Проверка баланса
- */
 public class AccountHandler extends BankHandler implements HttpHandler {
 
   private final AccountService service;
@@ -21,12 +15,6 @@ public class AccountHandler extends BankHandler implements HttpHandler {
 
   public AccountHandler(AccountService service) {
     this.service = service;
-  }
-
-  private CardStatusUpdateRequest createCardUpdateStatus(HttpExchange exchange, CardStatus status)
-      throws IOException {
-    return new CardStatusUpdateRequest(extractObjectFromJson(exchange, CardUpdateRequest.class),
-        status.getCode());
   }
 
   @Override

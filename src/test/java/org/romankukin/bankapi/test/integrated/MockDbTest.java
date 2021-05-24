@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractCollection;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -144,29 +143,6 @@ public class MockDbTest implements IntegratedTest {
   }
 
   @Test
-  void accountCreateTest() throws IOException {
-    URL url = new URL(createUrl("api/account"));
-    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-    connection.setRequestMethod(POST);
-    connection.setRequestProperty("Content-Type", "application/json");
-    connection.setDoOutput(true);
-
-    String request = new ResponseMapperBicycle("phone", "+75557774430").toJson();
-    try (OutputStream outputStream = connection.getOutputStream()) {
-      byte[] bytes = request.getBytes(StandardCharsets.UTF_8);
-      outputStream.write(bytes, 0, bytes.length);
-    }
-
-    String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
-        .lines()
-        .collect(Collectors.joining(System.lineSeparator()));
-    System.out.println(ACCOUNT_CREATE_REGEX);
-
-    assertTrue(response.matches(ACCOUNT_CREATE_REGEX), "Account: " + response);
-    assertEquals(ResponseStatus.CREATED.getCode(), connection.getResponseCode());
-  }
-
-  @Test
   void cardDepositTest() throws IOException {
     URL url = new URL(createUrl("api/card/deposit"));
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -192,5 +168,26 @@ public class MockDbTest implements IntegratedTest {
     assertEquals(ResponseStatus.OK.getCode(), connection.getResponseCode());
   }
 
+  @Test
+  void accountCreateTest() throws IOException {
+    URL url = new URL(createUrl("api/account"));
+    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    connection.setRequestMethod(POST);
+    connection.setRequestProperty("Content-Type", "application/json");
+    connection.setDoOutput(true);
+
+    String request = new ResponseMapperBicycle("phone", "+75557774430").toJson();
+    try (OutputStream outputStream = connection.getOutputStream()) {
+      byte[] bytes = request.getBytes(StandardCharsets.UTF_8);
+      outputStream.write(bytes, 0, bytes.length);
+    }
+
+    String response = new BufferedReader(new InputStreamReader(connection.getInputStream()))
+        .lines()
+        .collect(Collectors.joining(System.lineSeparator()));
+
+    assertTrue(response.matches(ACCOUNT_CREATE_REGEX), "Account: " + response);
+    assertEquals(ResponseStatus.CREATED.getCode(), connection.getResponseCode());
+  }
 
 }

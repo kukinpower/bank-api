@@ -1,17 +1,20 @@
 package org.romankukin.bankapi.dto.account;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class AccountCreateRequest {
 
   private String number;
+  private BigDecimal balance;
   private String phone;
 
   public AccountCreateRequest() {
   }
 
-  public AccountCreateRequest(String number, String phone) {
+  public AccountCreateRequest(String number, BigDecimal balance, String phone) {
     this.number = number;
+    this.balance = balance;
     this.phone = phone;
   }
 
@@ -21,6 +24,14 @@ public class AccountCreateRequest {
 
   public void setNumber(String number) {
     this.number = number;
+  }
+
+  public BigDecimal getBalance() {
+    return balance;
+  }
+
+  public void setBalance(BigDecimal balance) {
+    this.balance = balance;
   }
 
   public String getPhone() {
@@ -40,18 +51,19 @@ public class AccountCreateRequest {
       return false;
     }
     AccountCreateRequest that = (AccountCreateRequest) o;
-    return number.equals(that.number) && phone.equals(that.phone);
+    return number.equals(that.number) && balance.equals(that.balance) && phone.equals(that.phone);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(number, phone);
+    return Objects.hash(number, balance, phone);
   }
 
   @Override
   public String toString() {
     return "AccountCreateRequest{" +
         "number='" + number + '\'' +
+        ", balance=" + balance +
         ", phone='" + phone + '\'' +
         '}';
   }

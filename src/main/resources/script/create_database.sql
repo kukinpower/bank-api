@@ -17,6 +17,7 @@ create table IF NOT EXISTS client
 create table IF NOT EXISTS account
 (id int not null auto_increment,
  number char(20) NOT NULL unique,
+    balance decimal NOT NULL,
     clientId int NOT NULL,
     primary key(id),
     FOREIGN KEY (clientId) REFERENCES client(id));

@@ -21,11 +21,12 @@ public interface IntegratedTest {
   String ACCOUNT = "\"(account|accountId|accountNumber|number)\"\\s*:\\s*(\"[0-9]{20}\"|[0-9]+)";
   String PHONE_NUMBER = "\"\\+?[0-9]+\"";
   String PHONE = "\"phone\"\\s*:\\s*" + PHONE_NUMBER;
+  String BALANCE = "\"balance\"\\s*:\\s*" + DECIMAL;
   String CARD_BODY = "\\s*\\{\\s*" + CARD_NUMBER + ","
       + "\\s*\"pin\"\\s*:\\s*\"[0-9]{4}\","
       + "\\s*" + ACCOUNT + ","
       + "\\s*\"currency\"\\s*:\\s*\"[A-Z]{3}\","
-      + "\\s*\"balance\"\\s*:\\s*" + DECIMAL + ","
+      + "\\s*" + BALANCE + ","
       + "\\s*\"status\"\\s*:\\s*" + CARD_STATUS + "\\s*}\\s*";
 
   String CARD_REGEX = "^" + CARD_BODY + "$";
@@ -44,6 +45,7 @@ public interface IntegratedTest {
      + "\\s*\"amount\"\\s*:\\s*" + DECIMAL + "\\s*}\\s*$";
 
  String ACCOUNT_CREATE_REGEX = "^\\{\\s*" + ACCOUNT + "\\s*,"
+     + "\\s*" + BALANCE + "\\s*,"
      + "\\s*" + PHONE + "\\s*}\\s*$";
 
   default String createUrl(String path) {
