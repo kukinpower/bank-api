@@ -22,7 +22,7 @@ public class MockEmptyDbTest implements IntegratedTest {
   @BeforeEach
   void startServer() {
     appInMem = new BankApp(new InMemoryDatabaseConnection());
-    appInMem.initDatabase(DatabaseConnection.MOCK_DB_EMPTY_PATH);
+    appInMem.initDatabase(DatabaseConnection.EMPTY_DB_PATH);
     appInMem.runServer();
   }
 

@@ -8,8 +8,7 @@ import java.util.Properties;
 public abstract class DatabaseConnection {
 
   public final static String MOCK_DB_PATH = "script/create_table_mock.sql";
-  public final static String MOCK_DB_EMPTY_PATH = "script/create_table_mock_empty.sql";
-  public final static String SCRIPT_PATH = "script/create_table.sql";
+  public final static String EMPTY_DB_PATH = "script/create_table_empty.sql";
 
   protected abstract Properties extractProperties();
 
