@@ -43,7 +43,7 @@ public class BankApp {
         new CardHandler((CardServiceImpl) appContext.getBean("cardService")));
   }
 
-  public void initDatabase(String scriptPath) {
+  private void runScriptOnDatabase(String scriptPath) {
     try (Connection connection = ((DataSource) appContext.getBean("dataSource")).getConnection()) {
       RunScript.execute(connection, new FileReader(
           Objects.requireNonNull(getClass().getClassLoader().getResource(scriptPath)).getFile()));
@@ -52,6 +52,14 @@ public class BankApp {
       logger.error(e.getMessage());
       throw new ConnectionNotEstablishedException();
     }
+  }
+
+  public void initDatabase(String scriptPath) {
+    runScriptOnDatabase(scriptPath);
+  }
+
+  public void mockDatabase(String scriptPath) {
+    runScriptOnDatabase(scriptPath);
   }
 
   public boolean isRunning() {
@@ -79,7 +87,7 @@ public class BankApp {
 
   public static void main(String[] args) {
     BankApp bankApp = new BankApp(new FileDatabaseConnection());
-    bankApp.initDatabase(DatabaseConnection.SCRIPT_PATH);
+    bankApp.initDatabase(DatabaseConnection.CREATE_DB_PATH);
     bankApp.runServer();
   }
 }

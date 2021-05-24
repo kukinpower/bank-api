@@ -29,7 +29,8 @@ public class MockDbTest implements IntegratedTest {
   @BeforeAll
   static void startServer() {
     appInMem = new BankApp(new InMemoryDatabaseConnection());
-    appInMem.initDatabase(DatabaseConnection.MOCK_DB_PATH);
+    appInMem.initDatabase(DatabaseConnection.CREATE_DB_PATH);
+    appInMem.mockDatabase(DatabaseConnection.MOCK_DB_PATH);
     appInMem.runServer();
   }
 

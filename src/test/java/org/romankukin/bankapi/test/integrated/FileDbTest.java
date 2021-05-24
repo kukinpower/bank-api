@@ -28,7 +28,7 @@ public class FileDbTest implements IntegratedTest {
   @BeforeAll
   private static void init() {
     app = new BankApp(new FileDatabaseConnection());
-    app.initDatabase(DatabaseConnection.EMPTY_DB_PATH);
+    app.initDatabase(DatabaseConnection.CREATE_DB_PATH);
     app.runServer();
   }
 
