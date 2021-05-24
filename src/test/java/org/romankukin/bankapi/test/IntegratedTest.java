@@ -18,7 +18,9 @@ public interface IntegratedTest {
   String CARD_STATUS = "(\"[A-Z]+\"|[0-9]+)";
   String DECIMAL = "[0-9]+[.,]?[0-9]*";
   String CARD_NUMBER = "\"number\"\\s*:\\s*\"[0-9]{16}\"";
-  String ACCOUNT = "\"(account|accountId|accountNumber)\"\\s*:\\s*(\"[0-9]{20}\"|[0-9]+)";
+  String ACCOUNT = "\"(account|accountId|accountNumber|number)\"\\s*:\\s*(\"[0-9]{20}\"|[0-9]+)";
+  String PHONE_NUMBER = "\"\\+?[0-9]+\"";
+  String PHONE = "\"phone\"\\s*:\\s*" + PHONE_NUMBER;
   String CARD_BODY = "\\s*\\{\\s*" + CARD_NUMBER + ","
       + "\\s*\"pin\"\\s*:\\s*\"[0-9]{4}\","
       + "\\s*" + ACCOUNT + ","
@@ -40,6 +42,9 @@ public interface IntegratedTest {
 
  String CARD_DEPOSIT_REGEX = "^\\{\\s*" + CARD_NUMBER + ","
      + "\\s*\"amount\"\\s*:\\s*" + DECIMAL + "\\s*}\\s*$";
+
+ String ACCOUNT_CREATE_REGEX = "^\\{\\s*" + ACCOUNT + "\\s*,"
+     + "\\s*" + PHONE + "\\s*}\\s*$";
 
   default String createUrl(String path) {
     return PROTOCOL + HOST + ":" + PORT + "/" + path;
