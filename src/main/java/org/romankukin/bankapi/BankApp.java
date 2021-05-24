@@ -13,12 +13,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import javax.sql.DataSource;
 import org.h2.tools.RunScript;
 import org.romankukin.bankapi.context.AppContext;
+import org.romankukin.bankapi.controller.AccountHandler;
 import org.romankukin.bankapi.controller.CardHandler;
 import org.romankukin.bankapi.controller.HelloHandler;
 import org.romankukin.bankapi.dbconnection.DatabaseConnection;
 import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
+import org.romankukin.bankapi.dbconnection.InMemoryDatabaseConnection;
 import org.romankukin.bankapi.exception.ConnectionNotEstablishedException;
 import org.romankukin.bankapi.exception.CouldNotStartServerException;
+import org.romankukin.bankapi.service.account.impl.AccountServiceImpl;
 import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,8 @@ public class BankApp {
     server.createContext("/api/hello", new HelloHandler());
     server.createContext("/api/card",
         new CardHandler((CardServiceImpl) appContext.getBean("cardService")));
+    server.createContext("/api/account",
+        new AccountHandler((AccountServiceImpl) appContext.getBean("accountService")));
   }
 
   private void runScriptOnDatabase(String scriptPath) {
@@ -86,8 +91,10 @@ public class BankApp {
   }
 
   public static void main(String[] args) {
-    BankApp bankApp = new BankApp(new FileDatabaseConnection());
+//    BankApp bankApp = new BankApp(new FileDatabaseConnection());
+    BankApp bankApp = new BankApp(new InMemoryDatabaseConnection());
     bankApp.initDatabase(DatabaseConnection.CREATE_DB_PATH);
+    bankApp.mockDatabase(DatabaseConnection.MOCK_DB_PATH);
     bankApp.runServer();
   }
 }

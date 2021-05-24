@@ -61,5 +61,4 @@ public class FileDbTest implements IntegratedTest {
     assertEquals(ResponseStatus.CREATED.getCode(), connection.getResponseCode());
   }
 
-
 }

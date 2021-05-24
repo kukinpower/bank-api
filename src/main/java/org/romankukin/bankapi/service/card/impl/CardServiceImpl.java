@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Optional;
 import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
-import org.romankukin.bankapi.dto.AccountNumberRequest;
-import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
-import org.romankukin.bankapi.dto.CardCreateRequest;
-import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
-import org.romankukin.bankapi.dto.CardStatusDescriptor;
-import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
+import org.romankukin.bankapi.dto.card.AccountNumberRequest;
+import org.romankukin.bankapi.dto.card.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.dto.card.CardCreateRequest;
+import org.romankukin.bankapi.dto.card.CardNumberDeleteRequest;
+import org.romankukin.bankapi.dto.card.CardStatusDescriptor;
+import org.romankukin.bankapi.dto.card.CardStatusUpdateRequest;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.exception.ObjectNotCreatedException;
 import org.romankukin.bankapi.exception.TransactionFailedException;
@@ -21,8 +21,9 @@ import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
 import org.romankukin.bankapi.service.BankService;
 import org.romankukin.bankapi.service.Service;
+import org.romankukin.bankapi.service.card.CardService;
 
-public class CardServiceImpl implements Service, BankService {
+public class CardServiceImpl implements Service, BankService, CardService {
 
   private final CardDaoImpl dao;
   private final ObjectMapper mapper;
@@ -101,14 +102,6 @@ public class CardServiceImpl implements Service, BankService {
       throw new NoSuchEntityInDatabaseException("table is empty");
     }
     return dtoToJson(cards);
-  }
-
-  private <T> String dtoToJson(T dto) throws JsonProcessingException {
-    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
-  }
-
-  private <T> String dtoToJson(List<T> dto) throws JsonProcessingException {
-    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dto);
   }
 
   public String depositCard(CardBalanceUpdateRequest cardBalanceUpdate)

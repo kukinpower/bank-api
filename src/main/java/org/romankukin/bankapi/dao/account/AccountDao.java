@@ -1,17 +1,9 @@
 package org.romankukin.bankapi.dao.account;
 
-import java.util.List;
+import java.sql.Connection;
 import java.util.Optional;
-import org.romankukin.bankapi.model.Account;
+import org.romankukin.bankapi.dto.account.AccountCreateRequest;
 
 public interface AccountDao {
-  Optional<Account> getEntity(int id);
-
-  List<Account> getAllEntities();
-
-  Account update(Account t);
-
-  boolean create(Account t);
-
-  boolean delete(Account t);
+  Optional<AccountCreateRequest> createAccount(Connection connection, AccountCreateRequest accountCreateRequest);
 }

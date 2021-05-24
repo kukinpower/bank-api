@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.dto;
+package org.romankukin.bankapi.dto.card;
 
 public class CardStatusDescriptor {
 

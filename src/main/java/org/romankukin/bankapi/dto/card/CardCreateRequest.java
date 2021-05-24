@@ -1,4 +1,4 @@
-package org.romankukin.bankapi.dto;
+package org.romankukin.bankapi.dto.card;
 
 import java.math.BigDecimal;
 import java.util.Objects;

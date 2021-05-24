@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
-import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
-import org.romankukin.bankapi.dto.CardCreateRequest;
-import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
-import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
-import org.romankukin.bankapi.dto.CardStatusDescriptor;
+import org.romankukin.bankapi.dto.card.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.dto.card.CardCreateRequest;
+import org.romankukin.bankapi.dto.card.CardNumberDeleteRequest;
+import org.romankukin.bankapi.dto.card.CardStatusUpdateRequest;
+import org.romankukin.bankapi.dto.card.CardStatusDescriptor;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.Card;
 
