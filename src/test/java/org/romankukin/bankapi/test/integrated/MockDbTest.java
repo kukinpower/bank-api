@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -150,7 +151,7 @@ public class MockDbTest implements IntegratedTest {
 
     String request = new ResponseMapperBicycle(
         "number", "4000000967827322",
-        "amount", "143.99")
+        "amount", BigDecimal.valueOf(143.99))
         .toJson();
 
     try (OutputStream outputStream = connection.getOutputStream()) {

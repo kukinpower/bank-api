@@ -1,5 +1,6 @@
 package org.romankukin.bankapi.dao.card.impl;
 
+import org.romankukin.bankapi.dto.CardCreateRequest;
 import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusDescriptor;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
@@ -28,7 +29,7 @@ public class CardDaoImpl implements CardDao, Dao {
 
   private static final Logger logger = LoggerFactory.getLogger(CardDaoImpl.class);
 
-  private final static String CREATE_CARD = "insert into card values(?, ?, ?, ?, ?, ?)";
+  private final static String CREATE_CARD = "insert into card(number, pin, accountId, currency, balance, status) values (?, ?, (select id from account where account.number = ?), ?, ?, ?);";
   private final static String GET_ALL_FROM_CARD = "select * from card";
   private final static String FIND_CARD = "select * from card where number = '%s'";
   private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
@@ -51,7 +52,7 @@ public class CardDaoImpl implements CardDao, Dao {
   private static Card extractCardFromResultSet(ResultSet resultSet) throws SQLException {
     String number = resultSet.getString("number");
     String pin = resultSet.getString("pin");
-    String accountId = resultSet.getString("account");
+    int accountId = resultSet.getInt("accountId");
     Currency currency = Currency.valueOf(resultSet.getString("currency"));
     BigDecimal balance = resultSet.getBigDecimal("balance");
     CardStatus status = CardStatus.getCardStatusById(resultSet.getInt("status"));
@@ -115,7 +116,7 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public List<Card> getAllEntities() throws NoSuchEntityInDatabaseException {
+  public List<Card> getAllCards() throws NoSuchEntityInDatabaseException {
     try (Connection connection = dataSource.getConnection()) {
       try (Statement statement = connection.createStatement()) {
         try (ResultSet resultSet = statement.executeQuery(GET_ALL_FROM_CARD)) {
@@ -212,16 +213,16 @@ public class CardDaoImpl implements CardDao, Dao {
   }
 
   @Override
-  public Optional<Card> createCard(Connection connection, Card card) {
+  public Optional<CardCreateRequest> createCard(Connection connection, CardCreateRequest cardCreateRequest) {
     try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_CARD)) {
-      preparedStatement.setString(1, card.getNumber());
-      preparedStatement.setString(2, card.getPin());
-      preparedStatement.setString(3, card.getAccount());
-      preparedStatement.setString(4, card.getCurrency().toString());
-      preparedStatement.setBigDecimal(5, card.getBalance());
-      preparedStatement.setInt(6, card.getStatus().ordinal() + 1);
+      preparedStatement.setString(1, cardCreateRequest.getNumber());
+      preparedStatement.setString(2, cardCreateRequest.getPin());
+      preparedStatement.setString(3, cardCreateRequest.getAccountNumber());
+      preparedStatement.setString(4, cardCreateRequest.getCurrency().toString());
+      preparedStatement.setBigDecimal(5, cardCreateRequest.getBalance());
+      preparedStatement.setInt(6, cardCreateRequest.getStatus().ordinal() + 1);
       preparedStatement.executeUpdate();
-      return Optional.of(card);
+      return Optional.of(cardCreateRequest);
     } catch (SQLException e) {
       logger.error(e.getMessage());
       throw new DatabaseQueryException();

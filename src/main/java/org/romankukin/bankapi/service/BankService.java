@@ -5,8 +5,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public interface BankService {
   String BIN = "400000";
-  int CARD_LENGTH = 16;
-  int ACCOUNT_LENGTH = 20;
 
   default String generateRandomIntSequenceStringOfLength(int length) {
     StringBuilder stringBuilder = new StringBuilder();

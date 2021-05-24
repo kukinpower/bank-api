@@ -6,7 +6,6 @@ import javax.sql.DataSource;
 import org.romankukin.bankapi.dao.TransactionalManagerSql;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.dbconnection.DatabaseConnection;
-import org.romankukin.bankapi.dbconnection.FileDatabaseConnection;
 import org.romankukin.bankapi.service.card.impl.CardServiceImpl;
 
 public class AppContext {

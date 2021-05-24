@@ -15,3 +15,14 @@ create table IF NOT EXISTS card
     balance DECIMAL NOT NULL,
     status INTEGER NOT NULL,
     FOREIGN KEY (status) REFERENCES status(id));
+
+create table IF NOT EXISTS client
+(id int NOT NULL primary key auto_increment,
+ first_name varchar(255) NOT NULL,
+    last_name varchar(255) NOT NULL,
+    phone varchar(20) NOT NULL unique);
+
+create table IF NOT EXISTS account
+(number char(20) NOT NULL primary key,
+    clientId int NOT NULL,
+    FOREIGN KEY (clientId) REFERENCES client(id));

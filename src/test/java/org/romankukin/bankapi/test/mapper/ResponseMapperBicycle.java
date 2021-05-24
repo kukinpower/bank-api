@@ -1,5 +1,6 @@
 package org.romankukin.bankapi.test.mapper;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -9,20 +10,20 @@ import org.romankukin.bankapi.test.IntegratedTest;
 
 public class ResponseMapperBicycle {
 
-  private Map<String, String> map;
+  private Map<String, Object> map;
 
   public ResponseMapperBicycle() {
     this.map = new LinkedHashMap<>();
   }
 
-  public ResponseMapperBicycle(String... args) {
+  public ResponseMapperBicycle(Object... args) {
     this.map = new LinkedHashMap<>();
     for (int i = 0; i < args.length; i += 2) {
-      map.put(args[i], args[i + 1]);
+      map.put((String) args[i], args[i + 1]);
     }
   }
 
-  public ResponseMapperBicycle(Map<String, String> map) {
+  public ResponseMapperBicycle(Map<String, Object> map) {
     this.map = map;
   }
 
@@ -34,12 +35,14 @@ public class ResponseMapperBicycle {
     StringBuilder stringBuilder = new StringBuilder("{");
 
     int i = 0;
-    for (Entry<String, String> entry : map.entrySet()) {
+    for (Entry<String, Object> entry : map.entrySet()) {
       stringBuilder.append("\"")
           .append(entry.getKey())
           .append("\"")
           .append(":");
-      if (entry.getValue().matches(IntegratedTest.DECIMAL)) {
+      if (entry.getValue() instanceof BigDecimal) {
+        stringBuilder.append(((BigDecimal) entry.getValue()).toPlainString());
+      } else if (entry.getValue() instanceof Integer) {
         stringBuilder.append(entry.getValue());
       } else {
         stringBuilder.append("\"")
@@ -59,10 +62,10 @@ public class ResponseMapperBicycle {
     StringBuilder stringBuilder = new StringBuilder("?");
 
     int i = 0;
-    for (Entry<String, String> entry : map.entrySet()) {
+    for (Entry<String, Object> entry : map.entrySet()) {
       stringBuilder.append(URLEncoder.encode(entry.getKey()))
           .append("=")
-          .append(URLEncoder.encode(entry.getValue()));
+          .append(URLEncoder.encode((String) entry.getValue()));
       if (i + 1 < map.size()) {
         stringBuilder.append("&");
       }

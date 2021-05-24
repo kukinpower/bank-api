@@ -1,17 +1,17 @@
 package org.romankukin.bankapi.dao.account;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import org.romankukin.bankapi.model.Account;
 
-public interface AccountDao<T, K> {
-  Optional<T> getEntity(K id) throws SQLException;
+public interface AccountDao {
+  Optional<Account> getEntity(int id);
 
-  List<T> getAllEntities() throws SQLException;
+  List<Account> getAllEntities();
 
-  T update(T t) throws SQLException;
+  Account update(Account t);
 
-  boolean create(T t) throws SQLException;
+  boolean create(Account t);
 
-  boolean delete(T t);
+  boolean delete(Account t);
 }

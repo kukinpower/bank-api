@@ -18,9 +18,10 @@ public interface IntegratedTest {
   String CARD_STATUS = "(\"[A-Z]+\"|[0-9]+)";
   String DECIMAL = "[0-9]+[.,]?[0-9]*";
   String CARD_NUMBER = "\"number\"\\s*:\\s*\"[0-9]{16}\"";
+  String ACCOUNT = "\"(account|accountId|accountNumber)\"\\s*:\\s*(\"[0-9]{20}\"|[0-9]+)";
   String CARD_BODY = "\\s*\\{\\s*" + CARD_NUMBER + ","
       + "\\s*\"pin\"\\s*:\\s*\"[0-9]{4}\","
-      + "\\s*\"account\"\\s*:\\s*\"[0-9]{20}\","
+      + "\\s*" + ACCOUNT + ","
       + "\\s*\"currency\"\\s*:\\s*\"[A-Z]{3}\","
       + "\\s*\"balance\"\\s*:\\s*" + DECIMAL + ","
       + "\\s*\"status\"\\s*:\\s*" + CARD_STATUS + "\\s*}\\s*";

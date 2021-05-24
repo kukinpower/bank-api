@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.dto.CardCreateRequest;
 import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dto.CardStatusDescriptor;
@@ -15,7 +16,7 @@ public interface CardDao {
 
   Optional<Card> getCard(String numberId) throws NoSuchEntityInDatabaseException;
 
-  List<Card> getAllEntities() throws NoSuchEntityInDatabaseException;
+  List<Card> getAllCards() throws NoSuchEntityInDatabaseException;
 
   List<CardStatusDescriptor> getAllStatus() throws NoSuchEntityInDatabaseException;
 
@@ -30,7 +31,7 @@ public interface CardDao {
 
   Optional<Card> updateCard(Connection connection, Card card);
 
-  Optional<Card> createCard(Connection connection, Card card);
+  Optional<CardCreateRequest> createCard(Connection connection, CardCreateRequest card);
 
   CardNumberDeleteRequest deleteCard(Connection connection, CardNumberDeleteRequest cardNumberDeleteRequest);
 }

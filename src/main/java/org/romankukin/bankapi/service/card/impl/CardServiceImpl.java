@@ -9,6 +9,7 @@ import org.romankukin.bankapi.dao.TransactionalManager;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.dto.AccountNumberRequest;
 import org.romankukin.bankapi.dto.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.dto.CardCreateRequest;
 import org.romankukin.bankapi.dto.CardNumberDeleteRequest;
 import org.romankukin.bankapi.dto.CardStatusDescriptor;
 import org.romankukin.bankapi.dto.CardStatusUpdateRequest;
@@ -20,9 +21,8 @@ import org.romankukin.bankapi.model.CardStatus;
 import org.romankukin.bankapi.model.Currency;
 import org.romankukin.bankapi.service.BankService;
 import org.romankukin.bankapi.service.Service;
-import org.romankukin.bankapi.service.card.CardService;
 
-public class CardServiceImpl implements Service, CardService, BankService {
+public class CardServiceImpl implements Service, BankService {
 
   private final CardDaoImpl dao;
   private final ObjectMapper mapper;
@@ -34,28 +34,22 @@ public class CardServiceImpl implements Service, CardService, BankService {
     this.transactionalManager = transactionalManager;
   }
 
-  private Card createCardByAccountNumber(AccountNumberRequest accountNumberRequest) {
-    return new Card(generateCardNumber(), generateCardPin(), accountNumberRequest.getAccount(),
+  public String addNewCardToDatabase(AccountNumberRequest accountNumberRequest) throws JsonProcessingException {
+    CardCreateRequest cardCreateRequest = new CardCreateRequest(generateCardNumber(),
+        generateCardPin(), accountNumberRequest.getAccount(),
         Currency.RUB, BigDecimal.ZERO, CardStatus.PENDING);
-  }
 
-  public String addNewCardToDatabase(AccountNumberRequest accountNumberRequest)
-      throws JsonProcessingException {
-    return addNewCardToDatabase(createCardByAccountNumber(accountNumberRequest));
-  }
-
-  public String addNewCardToDatabase(Card card) throws JsonProcessingException {
-    validateCardNumber(card.getNumber());
+    validateCardNumber(cardCreateRequest.getNumber());
     try {
-      Optional<Card> entity = transactionalManager
-          .doTransaction((connection) -> dao.createCard(connection, card));
+      Optional<CardCreateRequest> entity = transactionalManager
+          .doTransaction((connection) -> dao.createCard(connection, cardCreateRequest));
       if (entity.isPresent()) {
-        return dtoToJson(card);
+        return dtoToJson(cardCreateRequest);
       }
     } catch (TransactionFailedException e) {
-      throw new ObjectNotCreatedException(card.toString(), e);
+      throw new ObjectNotCreatedException(cardCreateRequest.toString(), e);
     }
-    throw new ObjectNotCreatedException(card.toString());
+    throw new ObjectNotCreatedException(cardCreateRequest.toString());
   }
 
   private void validateCardNumber(String cardNumber) {
@@ -94,7 +88,7 @@ public class CardServiceImpl implements Service, CardService, BankService {
   }
 
   public String getAllCards() throws JsonProcessingException, NoSuchEntityInDatabaseException {
-    List<Card> cards = dao.getAllEntities();
+    List<Card> cards = dao.getAllCards();
     if (cards.isEmpty()) {
       throw new NoSuchEntityInDatabaseException("table is empty");
     }
