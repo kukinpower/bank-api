@@ -13,6 +13,10 @@ public interface AccountService extends BankService {
     return ACCOUNT_PREFIX + generateRandomIntSequenceStringOfLength(13);
   }
 
-  String addNewAccountToDatabase(ClientPhoneRequest accountNumberRequest) throws JsonProcessingException;
+  String addNewAccountToDatabase(ClientPhoneRequest accountNumberRequest)
+      throws JsonProcessingException;
+
   String getAllAccounts() throws JsonProcessingException, NoSuchEntityInDatabaseException;
+
+  String getAccount(int accountId) throws JsonProcessingException, NoSuchEntityInDatabaseException;
 }

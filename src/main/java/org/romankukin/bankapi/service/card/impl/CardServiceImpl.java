@@ -64,7 +64,7 @@ public class CardServiceImpl implements Service, BankService, CardService {
     validateCardNumber(cardNumber);
     Optional<Card> entity = dao.getCard(cardNumber);
     if (!entity.isPresent()) {
-      throw new NoSuchEntityInDatabaseException("table is empty");
+      throw new NoSuchEntityInDatabaseException(TABLE_IS_EMPTY);
     }
     return dtoToJson(entity.get());
   }
@@ -91,7 +91,7 @@ public class CardServiceImpl implements Service, BankService, CardService {
   public String getAllCards() throws JsonProcessingException, NoSuchEntityInDatabaseException {
     List<Card> cards = dao.getAllCards();
     if (cards.isEmpty()) {
-      throw new NoSuchEntityInDatabaseException("table is empty");
+      throw new NoSuchEntityInDatabaseException(TABLE_IS_EMPTY);
     }
     return dtoToJson(cards);
   }
@@ -99,7 +99,7 @@ public class CardServiceImpl implements Service, BankService, CardService {
   public String getAllCardsStatus() throws JsonProcessingException, NoSuchEntityInDatabaseException {
     List<CardStatusDescriptor> cards = dao.getAllStatus();
     if (cards.isEmpty()) {
-      throw new NoSuchEntityInDatabaseException("table is empty");
+      throw new NoSuchEntityInDatabaseException(TABLE_IS_EMPTY);
     }
     return dtoToJson(cards);
   }

@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public interface BankService {
 
   ObjectMapper mapper = new ObjectMapper();
+  String TABLE_IS_EMPTY = "Table is empty";
 
   default String generateRandomIntSequenceStringOfLength(int length) {
     StringBuilder stringBuilder = new StringBuilder();

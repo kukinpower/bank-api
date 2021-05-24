@@ -6,6 +6,7 @@ If the card isn't found - `404`
 `400` On bad request  
 If card is closed you can't update it. Even it's status  
 If card status is `PENDING` (`1`) it updates to `ACTIVE` (`2`) with first deposit  
+Updates account balance when card balance is updated  
 
 ## 💳 Card API
 ```
@@ -48,6 +49,7 @@ api/card/delete
 GET
 
 api/account/all
+api/account?id=2
 ```
 ```
 POST

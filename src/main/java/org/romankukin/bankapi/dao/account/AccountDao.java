@@ -22,4 +22,6 @@ public interface AccountDao {
       AccountCreateRequest accountCreateRequest);
 
   List<Account> getAllAccounts() throws NoSuchEntityInDatabaseException;
+
+  Optional<Account> getAccount(int numberId) throws NoSuchEntityInDatabaseException;
 }

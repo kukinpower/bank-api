@@ -23,16 +23,7 @@ public class AccountDaoImpl implements AccountDao {
 
   private final static String CREATE_ACCOUNT = "insert into account(number, balance, clientId) values (?, ?, (select id from client where client.phone = ?))";
   private final static String GET_ALL_FROM_ACCOUNT = "select * from account";
-//  private final static String FIND_CARD = "select * from card where number = '%s'";
-//  private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
-//  private final static String GET_CARD_STATUS = "select status from card where number = '%s'";
-//  private static final String DELETE_CARD = "delete from card where number = ?";
-//  private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ? and status != 3";
-//  private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ? and status != 3";
-//  private static final String UPDATE_CARD_BALANCE = "update card set status = case when status = 1 then 2 else status end,"
-//      + " balance = balance + ? where number = ? and status != 3";
-//  private static final String GET_ALL_STATUS = "select number, descriptor from CARD join status s on s.id = card.status group by descriptor, number";
-//
+  private final static String FIND_CARD = "select * from account where id = '%s'";
   private static final String NO_SUCH_ACCOUNT = "No account with this number in database. Or it is already closed.";
 
   private final DataSource dataSource;
@@ -54,25 +45,25 @@ public class AccountDaoImpl implements AccountDao {
       throw new DatabaseQueryException();
     }
   }
-  //  @Override
-//  public Optional<Account> getCard(String numberId) throws NoSuchEntityInDatabaseException {
-//    try (Connection connection = dataSource.getConnection()) {
-//      try (Statement statement = connection.createStatement()) {
-//        try (ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId))) {
-//          if (!resultSet.next()) {
-//            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//          }
-//
-//          return Optional.of(extractCardFromResultSet(resultSet));
-//        }
-//      }
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
 
-//
+    @Override
+    public Optional<Account> getAccount(int numberId) throws NoSuchEntityInDatabaseException {
+    try (Connection connection = dataSource.getConnection()) {
+      try (Statement statement = connection.createStatement()) {
+        try (ResultSet resultSet = statement.executeQuery(String.format(FIND_CARD, numberId))) {
+          if (!resultSet.next()) {
+            throw new NoSuchEntityInDatabaseException(NO_SUCH_ACCOUNT);
+          }
+
+          return Optional.of(extractAccountFromResultSet(resultSet));
+        }
+      }
+    } catch (SQLException e) {
+      logger.error(e.getMessage());
+      throw new DatabaseQueryException();
+    }
+  }
+
   @Override
   public List<Account> getAllAccounts() throws NoSuchEntityInDatabaseException {
     try (Connection connection = dataSource.getConnection()) {
@@ -94,135 +85,4 @@ public class AccountDaoImpl implements AccountDao {
       throw new DatabaseQueryException();
     }
   }
-
-
-
-//
-//  @Override
-//  public BigDecimal getCardBalance(String numberId) throws NoSuchEntityInDatabaseException {
-//    try (Connection connection = dataSource.getConnection()) {
-//      try (Statement statement = connection.createStatement()) {
-//        try (ResultSet resultSet = statement
-//            .executeQuery(String.format(GET_CARD_BALANCE, numberId))) {
-//          if (!resultSet.next()) {
-//            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//          }
-//
-//          return resultSet.getBigDecimal(1);
-//        }
-//      }
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
-//
-//  @Override
-//  public CardStatusUpdateRequest getCardStatus(String numberId)
-//      throws NoSuchEntityInDatabaseException {
-//    try (Connection connection = dataSource.getConnection()) {
-//      try (Statement statement = connection.createStatement()) {
-//        try (ResultSet resultSet = statement
-//            .executeQuery(String.format(GET_CARD_STATUS, numberId))) {
-//          if (!resultSet.next()) {
-//            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//          }
-//          return new CardStatusUpdateRequest(numberId, resultSet.getInt(1));
-//        }
-//      }
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
-//
-//
-//  @Override
-//  public List<CardStatusDescriptor> getAllStatus() throws NoSuchEntityInDatabaseException {
-//    try (Connection connection = dataSource.getConnection()) {
-//      try (Statement statement = connection.createStatement()) {
-//        try (ResultSet resultSet = statement.executeQuery(GET_ALL_STATUS)) {
-//          List<CardStatusDescriptor> statuses = new ArrayList<>();
-//          while (resultSet.next()) {
-//            statuses.add(new CardStatusDescriptor(resultSet.getString("number"),
-//                resultSet.getString("descriptor")));
-//          }
-//          if (statuses.isEmpty()) {
-//            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//          }
-//
-//          return statuses;
-//        }
-//      }
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
-//
-//  @Override
-//  public CardStatusUpdateRequest updateCardStatus(Connection connection,
-//      CardStatusUpdateRequest cardStatusUpdateRequest) {
-//    try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_STATUS)) {
-//      preparedStatement.setInt(1, cardStatusUpdateRequest.getStatus());
-//      preparedStatement.setString(2, cardStatusUpdateRequest.getNumber());
-//      if (preparedStatement.executeUpdate() == 0) {
-//        throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//      }
-//      return cardStatusUpdateRequest;
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
-//
-//  public CardBalanceUpdateRequest updateCardBalance(Connection connection,
-//      CardBalanceUpdateRequest cardBalanceUpdateRequest) throws NoSuchEntityInDatabaseException {
-//    try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_BALANCE)) {
-//      preparedStatement.setBigDecimal(1, cardBalanceUpdateRequest.getAmount());
-//      preparedStatement.setString(2, cardBalanceUpdateRequest.getNumber());
-//      if (preparedStatement.executeUpdate() == 0) {
-//        throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//      }
-//      return cardBalanceUpdateRequest;
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
-//
-//  @Override
-//  public Optional<Account> updateCard(Connection connection, Account account) {
-//    try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD)) {
-//      preparedStatement.setBigDecimal(1, card.getBalance());
-//
-//      if (card.getStatus() == CardStatus.PENDING) {
-//        card.setStatus(CardStatus.ACTIVE);
-//      }
-//      preparedStatement.setInt(2, card.getStatus().getCode());
-//      preparedStatement.setString(3, card.getNumber());
-//      if (preparedStatement.executeUpdate() == 0) {
-//        throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//      }
-//
-//      return Optional.of(card);
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
-//
-//
-//  @Override
-//  public CardNumberDeleteRequest deleteCard(Connection connection,
-//      CardNumberDeleteRequest cardNumberDeleteRequest) {
-//    try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_CARD)) {
-//      preparedStatement.setString(1, cardNumberDeleteRequest.getNumber());
-//      preparedStatement.executeUpdate();
-//      return cardNumberDeleteRequest;
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
 }
