@@ -1,5 +1,6 @@
 package org.romankukin.bankapi.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
@@ -36,13 +37,11 @@ public class AccountHandler extends BankHandler implements HttpHandler {
   }
 
   @Override
-  protected String handleGet(HttpExchange exchange, String path) {
+  protected String handleGet(HttpExchange exchange, String path) throws JsonProcessingException {
     //all needing nothing
-//    if ("api/card/all".equals(path)) {
-//      return service.getAllCards();
-//    } else if ("api/card/all/status".equals(path)) {
-//      return service.getAllCardsStatus();
-//    }
+    if ("api/account/all".equals(path)) {
+      return service.getAllAccounts();
+    }
 //
 //    //all needing params
 //    Map<String, String> params = getParametersFromQuery(exchange);

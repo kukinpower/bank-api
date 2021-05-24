@@ -1,5 +1,12 @@
 # 💵 Bank-api
 
+## 🍧 Features
+On card creation return `201` status code  
+If the card isn't found - `404`  
+`400` On bad request  
+If card is closed you can't update it. Even it's status  
+If card status is `PENDING` (`1`) it updates to `ACTIVE` (`2`) with first deposit  
+
 ## 💳 Card API
 ```
 GET
@@ -14,7 +21,6 @@ api/card/balance?number=4000000967827322
 
 api/card/status?number=4000000967827322
 ```
-
 ```
 POST
 
@@ -35,12 +41,19 @@ api/card/close
 
 api/card/delete
 {"number":"4000000967827322"}
-
-
 ```
-### 🍧 Features
-On card creation return `201` status code  
-If the card isn't found - `404`  
-`400` On bad request  
-If card is closed you can't update it. Even it's status  
-If card status is `PENDING` (`1`) it updates to `ACTIVE` (`2`) with first deposit  
+
+## 🧮 Account API
+```
+GET
+
+api/account/all
+```
+```
+POST
+
+api/account
+{"phone":"+75557774430"}
+```
+
+Author: Roman Kukin

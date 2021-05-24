@@ -15,7 +15,7 @@ import org.romankukin.bankapi.service.ResponseStatus;
 import org.romankukin.bankapi.test.IntegratedTest;
 import org.romankukin.bankapi.test.mapper.ResponseMapperBicycle;
 
-public class MockEmptyDbTest implements IntegratedTest {
+public class EmptyDbTest implements IntegratedTest {
 
   private BankApp appInMem;
 

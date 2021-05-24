@@ -37,8 +37,12 @@ public class CardDaoImpl implements CardDao, Dao {
   private static final String DELETE_CARD = "delete from card where number = ?";
   private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ? and status != 3";
   private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ? and status != 3";
-  private static final String UPDATE_CARD_BALANCE = "update card set status = case when status = 1 then 2 else status end,"
+  private static final String CARD_DEPOSIT = "update card set status = case when status = 1 then 2 else status end,"
       + " balance = balance + ? where number = ? and status != 3";
+  private static final String CARD_ACCOUNT_DEPOSIT = "update account set balance = balance + ?"
+      + " where id in"
+      + " (select accountId from card"
+      + " where number = ?);";
   private static final String GET_ALL_STATUS = "select number, descriptor from CARD join status s on s.id = card.status group by descriptor, number";
 
   private static final String NO_SUCH_CARD = "No card with this number in database. Or it is already closed.";
@@ -47,16 +51,6 @@ public class CardDaoImpl implements CardDao, Dao {
 
   public CardDaoImpl(DataSource dataSource) {
     this.dataSource = dataSource;
-  }
-
-  private static Card extractCardFromResultSet(ResultSet resultSet) throws SQLException {
-    String number = resultSet.getString("number");
-    String pin = resultSet.getString("pin");
-    int accountId = resultSet.getInt("accountId");
-    Currency currency = Currency.valueOf(resultSet.getString("currency"));
-    BigDecimal balance = resultSet.getBigDecimal("balance");
-    CardStatus status = CardStatus.getCardStatusById(resultSet.getInt("status"));
-    return new Card(number, pin, accountId, currency, balance, status);
   }
 
   @Override
@@ -178,11 +172,15 @@ public class CardDaoImpl implements CardDao, Dao {
 
   public CardBalanceUpdateRequest updateCardBalance(Connection connection,
       CardBalanceUpdateRequest cardBalanceUpdateRequest) throws NoSuchEntityInDatabaseException {
-    try (PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_CARD_BALANCE)) {
+    try (PreparedStatement preparedStatement = connection.prepareStatement(CARD_DEPOSIT)) {
       preparedStatement.setBigDecimal(1, cardBalanceUpdateRequest.getAmount());
       preparedStatement.setString(2, cardBalanceUpdateRequest.getNumber());
       if (preparedStatement.executeUpdate() == 0) {
         throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
+      }
+      try (PreparedStatement preparedStatementAccount = connection.prepareStatement(CARD_ACCOUNT_DEPOSIT)) {
+        preparedStatementAccount.setBigDecimal(1, cardBalanceUpdateRequest.getAmount());
+        preparedStatementAccount.setString(2, cardBalanceUpdateRequest.getNumber());
       }
       return cardBalanceUpdateRequest;
     } catch (SQLException e) {

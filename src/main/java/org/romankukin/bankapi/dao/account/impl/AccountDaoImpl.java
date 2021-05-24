@@ -2,13 +2,19 @@ package org.romankukin.bankapi.dao.account.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.romankukin.bankapi.dao.account.AccountDao;
 import org.romankukin.bankapi.dao.card.impl.CardDaoImpl;
 import org.romankukin.bankapi.dto.account.AccountCreateRequest;
 import org.romankukin.bankapi.exception.DatabaseQueryException;
+import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
+import org.romankukin.bankapi.model.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,18 +22,18 @@ public class AccountDaoImpl implements AccountDao {
   private static final Logger logger = LoggerFactory.getLogger(CardDaoImpl.class);
 
   private final static String CREATE_ACCOUNT = "insert into account(number, balance, clientId) values (?, ?, (select id from client where client.phone = ?))";
-  private final static String GET_ALL_FROM_CARD = "select * from card";
-  private final static String FIND_CARD = "select * from card where number = '%s'";
-  private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
-  private final static String GET_CARD_STATUS = "select status from card where number = '%s'";
-  private static final String DELETE_CARD = "delete from card where number = ?";
-  private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ? and status != 3";
-  private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ? and status != 3";
-  private static final String UPDATE_CARD_BALANCE = "update card set status = case when status = 1 then 2 else status end,"
-      + " balance = balance + ? where number = ? and status != 3";
-  private static final String GET_ALL_STATUS = "select number, descriptor from CARD join status s on s.id = card.status group by descriptor, number";
-
-  private static final String NO_SUCH_CARD = "No card with this number in database. Or it is already closed.";
+  private final static String GET_ALL_FROM_ACCOUNT = "select * from account";
+//  private final static String FIND_CARD = "select * from card where number = '%s'";
+//  private final static String GET_CARD_BALANCE = "select balance from card where number = '%s'";
+//  private final static String GET_CARD_STATUS = "select status from card where number = '%s'";
+//  private static final String DELETE_CARD = "delete from card where number = ?";
+//  private static final String UPDATE_CARD = "update card set balance = ?, status = ? where number = ? and status != 3";
+//  private static final String UPDATE_CARD_STATUS = "update card set status = ? where number = ? and status != 3";
+//  private static final String UPDATE_CARD_BALANCE = "update card set status = case when status = 1 then 2 else status end,"
+//      + " balance = balance + ? where number = ? and status != 3";
+//  private static final String GET_ALL_STATUS = "select number, descriptor from CARD join status s on s.id = card.status group by descriptor, number";
+//
+  private static final String NO_SUCH_ACCOUNT = "No account with this number in database. Or it is already closed.";
 
   private final DataSource dataSource;
 
@@ -48,18 +54,7 @@ public class AccountDaoImpl implements AccountDao {
       throw new DatabaseQueryException();
     }
   }
-//
-//  private static Account extractCardFromResultSet(ResultSet resultSet) throws SQLException {
-//    String number = resultSet.getString("number");
-//    String pin = resultSet.getString("pin");
-//    int accountId = resultSet.getInt("accountId");
-//    Currency currency = Currency.valueOf(resultSet.getString("currency"));
-//    BigDecimal balance = resultSet.getBigDecimal("balance");
-//    CardStatus status = CardStatus.getCardStatusById(resultSet.getInt("status"));
-//    return new Account(number, pin, accountId, currency, balance, status);
-//  }
-//
-//  @Override
+  //  @Override
 //  public Optional<Account> getCard(String numberId) throws NoSuchEntityInDatabaseException {
 //    try (Connection connection = dataSource.getConnection()) {
 //      try (Statement statement = connection.createStatement()) {
@@ -76,6 +71,32 @@ public class AccountDaoImpl implements AccountDao {
 //      throw new DatabaseQueryException();
 //    }
 //  }
+
+//
+  @Override
+  public List<Account> getAllAccounts() throws NoSuchEntityInDatabaseException {
+    try (Connection connection = dataSource.getConnection()) {
+      try (Statement statement = connection.createStatement()) {
+        try (ResultSet resultSet = statement.executeQuery(GET_ALL_FROM_ACCOUNT)) {
+          List<Account> accounts = new ArrayList<>();
+          while (resultSet.next()) {
+            accounts.add(extractAccountFromResultSet(resultSet));
+          }
+          if (accounts.isEmpty()) {
+            throw new NoSuchEntityInDatabaseException(NO_SUCH_ACCOUNT);
+          }
+
+          return accounts;
+        }
+      }
+    } catch (SQLException e) {
+      logger.error(e.getMessage());
+      throw new DatabaseQueryException();
+    }
+  }
+
+
+
 //
 //  @Override
 //  public BigDecimal getCardBalance(String numberId) throws NoSuchEntityInDatabaseException {
@@ -115,27 +136,6 @@ public class AccountDaoImpl implements AccountDao {
 //    }
 //  }
 //
-//  @Override
-//  public List<Account> getAllCards() throws NoSuchEntityInDatabaseException {
-//    try (Connection connection = dataSource.getConnection()) {
-//      try (Statement statement = connection.createStatement()) {
-//        try (ResultSet resultSet = statement.executeQuery(GET_ALL_FROM_CARD)) {
-//          List<Account> cards = new ArrayList<>();
-//          while (resultSet.next()) {
-//            cards.add(extractCardFromResultSet(resultSet));
-//          }
-//          if (cards.isEmpty()) {
-//            throw new NoSuchEntityInDatabaseException(NO_SUCH_CARD);
-//          }
-//
-//          return cards;
-//        }
-//      }
-//    } catch (SQLException e) {
-//      logger.error(e.getMessage());
-//      throw new DatabaseQueryException();
-//    }
-//  }
 //
 //  @Override
 //  public List<CardStatusDescriptor> getAllStatus() throws NoSuchEntityInDatabaseException {
