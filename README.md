@@ -59,4 +59,7 @@ api/account
 {"phone":"+75557774430"}
 ```
 
+## DB design
+<img src="img/db.png" alt="database schema"/>
+
 Author: Roman Kukin
