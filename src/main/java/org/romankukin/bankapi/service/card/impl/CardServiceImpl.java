@@ -42,7 +42,8 @@ public class CardServiceImpl implements Service, BankService, CardService {
 
     validateCardNumber(cardCreateRequest.getNumber());
     try {
-      Optional<CardCreateRequest> entity = transactionalManager.doTransaction((connection) -> dao.createCard(connection, cardCreateRequest));
+      Optional<CardCreateRequest> entity = transactionalManager
+          .doTransaction((connection) -> dao.createCard(connection, cardCreateRequest));
       if (entity.isPresent()) {
         return dtoToJson(cardCreateRequest);
       }
