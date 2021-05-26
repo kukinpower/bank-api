@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.romankukin.bankapi.dto.card.AccountNumberRequest;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.service.ResponseStatus;
 import org.slf4j.Logger;

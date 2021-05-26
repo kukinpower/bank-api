@@ -1,11 +1,5 @@
 package org.romankukin.bankapi.dao.card.impl;
 
-import org.romankukin.bankapi.dto.card.CardCreateRequest;
-import org.romankukin.bankapi.dto.card.CardNumberDeleteRequest;
-import org.romankukin.bankapi.dto.card.CardStatusDescriptor;
-import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,14 +10,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
-import org.romankukin.bankapi.dto.card.CardBalanceUpdateRequest;
-import org.romankukin.bankapi.dto.card.CardStatusUpdateRequest;
 import org.romankukin.bankapi.dao.Dao;
 import org.romankukin.bankapi.dao.card.CardDao;
+import org.romankukin.bankapi.dto.card.CardBalanceUpdateRequest;
+import org.romankukin.bankapi.dto.card.CardCreateRequest;
+import org.romankukin.bankapi.dto.card.CardNumberDeleteRequest;
+import org.romankukin.bankapi.dto.card.CardStatusDescriptor;
+import org.romankukin.bankapi.dto.card.CardStatusUpdateRequest;
 import org.romankukin.bankapi.exception.DatabaseQueryException;
+import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.model.Card;
 import org.romankukin.bankapi.model.CardStatus;
-import org.romankukin.bankapi.model.Currency;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CardDaoImpl implements CardDao, Dao {
 

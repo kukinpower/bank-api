@@ -1,14 +1,14 @@
 package org.romankukin.bankapi.dao;
 
-import org.romankukin.bankapi.exception.DatabaseQueryException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import javax.sql.DataSource;
 import org.romankukin.bankapi.dao.card.SupplierDao;
+import org.romankukin.bankapi.exception.DatabaseQueryException;
 import org.romankukin.bankapi.exception.TransactionFailedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TransactionalManagerSql implements TransactionalManager {
 

@@ -1,9 +1,8 @@
 package org.romankukin.bankapi.dbconnection;
 
+import java.util.Properties;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
-
-import java.util.Properties;
 
 public abstract class DatabaseConnection {
 
