@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.romankukin.bankapi.dto.card.AccountNumberRequest;
 import org.romankukin.bankapi.exception.NoSuchEntityInDatabaseException;
 import org.romankukin.bankapi.service.ResponseStatus;
 import org.slf4j.Logger;
@@ -17,9 +16,14 @@ public abstract class BankHandler {
 
   protected static final String BAD_REQUEST_MESSAGE = "Bad request";
   private static final Logger logger = LoggerFactory.getLogger(CardHandler.class);
+  private final ObjectMapper objectMapper;
 
   abstract String handlePost(HttpExchange ex, String path) throws IOException;
   abstract String handleGet(HttpExchange exchange, String path) throws IOException;
+
+  public BankHandler() {
+    this.objectMapper = new ObjectMapper();
+  }
 
   protected Map<String, String> getParametersFromQuery(HttpExchange exchange) {
     String query = exchange.getRequestURI().getQuery();
@@ -33,7 +37,6 @@ public abstract class BankHandler {
 
   protected <T> T extractObjectFromJson(HttpExchange httpExchange, Class<T> classObject)
       throws IOException {
-    ObjectMapper objectMapper = new ObjectMapper();
     T dto = objectMapper.readValue(httpExchange.getRequestBody(), classObject);
     logger.debug("PARAMS: {}", dto);
     return dto;

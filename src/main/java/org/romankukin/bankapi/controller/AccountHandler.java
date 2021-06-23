@@ -16,6 +16,7 @@ public class AccountHandler extends BankHandler implements HttpHandler {
   private static final Logger logger = LoggerFactory.getLogger(AccountHandler.class);
 
   public AccountHandler(AccountService service) {
+    super();
     this.service = service;
   }
 

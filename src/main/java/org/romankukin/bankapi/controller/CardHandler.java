@@ -23,6 +23,7 @@ public class CardHandler extends BankHandler implements HttpHandler {
   private static final Logger logger = LoggerFactory.getLogger(CardHandler.class);
 
   public CardHandler(CardServiceImpl service) {
+    super();
     this.service = service;
   }
 
