@@ -9,6 +9,9 @@ If card status is `PENDING` (`1`) it updates to `ACTIVE` (`2`) with first deposi
 Updates account balance when card balance is updated  
 Using transactions on all DML operations  
 
+## DB design
+<img src="img/db.png" alt="database schema"/>
+
 ## 💳 Card API
 ```
 GET
@@ -58,8 +61,5 @@ POST
 api/account
 {"phone":"+75557774430"}
 ```
-
-## DB design
-<img src="img/db.png" alt="database schema"/>
 
 Author: Roman Kukin
